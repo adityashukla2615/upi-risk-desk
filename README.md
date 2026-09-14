@@ -8,7 +8,7 @@ An end-to-end analytics and risk-intelligence platform for detecting
 fraud patterns, merchant risk, dispute clusters, and suspicious UPI
 transaction behaviour.
 
-[🚀 Dashboard](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
+[🚀 Dashboard](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [📈 Results](#-key-results) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-3.0-150458?logo=pandas&logoColor=white)
@@ -29,6 +29,157 @@ transaction behaviour.
 ### 📊 UPI Risk Dashboard
 
 [**Open Interactive Dashboard →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html)
+
+---
+
+## 📈 Key Results
+
+> One quarter of UPI traffic · **1 Jan – 31 Mar 2026** · 4 source systems cleaned and linked · all figures from [`outputs/metrics.json`](outputs/metrics.json)
+
+### At a glance
+
+<table>
+  <tr>
+    <td align="center" width="25%"><h2>20,000</h2><sub>transactions<br>after removing 400 duplicates</sub></td>
+    <td align="center" width="25%"><h2>₹24.98 Cr</h2><sub>payment value<br>avg ticket ₹12,489</sub></td>
+    <td align="center" width="25%"><h2>12.3%</h2><sub>chargeback-to-txn ratio<br>2,451 disputed payments</sub></td>
+    <td align="center" width="25%"><h2>₹1.01 Cr</h2><sub>in dispute<br>across 2,800 complaints</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><h2>37%</h2><sub>fraud-type disputes<br>takeover · unauthorised · suspected</sub></td>
+    <td align="center"><h2>53%</h2><sub>disputes still open<br>1,492 of 2,800</sub></td>
+    <td align="center"><h2>234 / 100</h2><sub>high-risk merchants / users<br>+385 / 230 medium</sub></td>
+    <td align="center"><h2>121</h2><sub>suspicious dispute rings<br>found in the payment graph</sub></td>
+  </tr>
+</table>
+
+### 🚨 What the risk team should act on
+
+> [!CAUTION]
+> **Identity is the biggest control gap.** 67.6% of payments (₹16.95 Cr, 67.9% of value) come from users with **no KYC record**, and 6,288 customer IDs resolve to more than one person.
+
+> [!WARNING]
+> **Rejected-KYC customers are still transacting — and dispute the most** (15.0% vs 13.2% for verified). A rejected KYC should block or step-up UPI payments.
+
+> [!IMPORTANT]
+> **One in eight payments is disputed.** 37% of complaints are fraud-type and 53% are unresolved. Unauthorised transactions have the highest share reported late (27% after 7 days).
+
+> [!NOTE]
+> **Cleaning changed the answer.** 400 duplicate payments would have inflated volume by **₹51.9 L**, and every linked complaint carries IDs that differ from the payment it disputes — attributing through `txn_id` avoids blaming the wrong merchants.
+
+### 🏷️ Dispute rate by merchant category
+
+Categories with ≥ 1,000 payments (smaller books swing too much to rank):
+
+| Category | Payments | Value | Dispute rate | | Chargebacks | Disputed | Fraud-type |
+|:---|---:|---:|---:|:---|---:|---:|---:|
+| 🔴 **Transportation** | 2,972 | ₹3.70 Cr | **13.4%** | `████████████████████` | 434 | ₹14.99 L | 35% |
+| 🟠 Restaurants | 2,991 | ₹3.69 Cr | 12.8% | `███████████████████` | 404 | ₹15.16 L | 41% |
+| 🟠 Grocery | 5,838 | ₹7.37 Cr | 12.4% | `███████████████████` | 759 | **₹29.38 L** | 37% |
+| 🟢 Hotels & Lodging | 2,962 | ₹3.70 Cr | 11.6% | `█████████████████` | 361 | ₹12.90 L | 34% |
+| 🟢 Pharmacy | 3,013 | ₹3.70 Cr | 11.5% | `█████████████████` | 374 | ₹12.95 L | 38% |
+
+<sub>Dispute rate = payments with ≥1 linked chargeback ÷ payments. 🔴 above the 12.3% overall rate by >1 pt · 🟠 above · 🟢 below.</sub>
+
+### 🪪 KYC status vs dispute behaviour
+
+| KYC status | Payments | Value | Dispute rate | | Failed rate | Fraud-type share |
+|:---|---:|---:|---:|:---|---:|---:|
+| ⛔ **Rejected** | 521 | ₹0.62 Cr | **15.0%** | `████████████████████` | 11.1% | 28% |
+| ⏳ In review | 364 | ₹0.46 Cr | 14.0% | `███████████████████` | 10.2% | 31% |
+| ✅ Verified | 4,978 | ₹6.19 Cr | 13.2% | `██████████████████` | 9.5% | 39% |
+| ❓ No KYC record | 13,522 | ₹16.95 Cr | 11.9% | `████████████████` | 9.8% | 37% |
+| 🕓 Pending | 615 | ₹0.75 Cr | 8.9% | `████████████` | 8.9% | 43% |
+
+<sub>Customer base: 28,920 KYC users · 77.4% verified · 8.2% rejected.</sub>
+
+### ⚖️ Chargebacks: why, and how late
+
+<table>
+<tr>
+<td width="55%" valign="top">
+
+| Reason | Complaints | Disputed | Mean delay | > 7 days |
+|:---|---:|---:|---:|---:|
+| 🔴 Unauthorised txn | 371 | ₹14.04 L | 8.6 d | **27%** |
+| 🔴 Account takeover | 344 | ₹11.07 L | **6.8 d** | 24% |
+| 🔴 Fraud suspected | 327 | ₹12.30 L | 7.5 d | 23% |
+| General dispute | 376 | ₹14.18 L | 7.5 d | 22% |
+| Not delivered | 375 | ₹13.35 L | 8.3 d | 25% |
+| Duplicate debit | 352 | ₹12.32 L | **9.9 d** | 25% |
+| Service not provided | 329 | ₹12.08 L | 7.5 d | 24% |
+| Wrong amount | 326 | ₹11.39 L | 7.7 d | 20% |
+
+<sub>🔴 fraud-type reason · takeovers are reported fastest, duplicate debits slowest (found on statements).</sub>
+
+</td>
+<td width="45%" valign="top">
+
+```mermaid
+pie showData title Resolution status
+    "In progress" : 599
+    "Pending bank" : 458
+    "Open" : 435
+    "Rejected" : 443
+    "Closed" : 442
+    "Resolved" : 423
+```
+
+</td>
+</tr>
+</table>
+
+**Reporting delay** — mean 8.0 days, median 3.2 days, **666 disputes reported after 7 days**:
+
+| Reported after payment | Complaints | Share | |
+|:---|---:|---:|:---|
+| ≤ 1 day | 359 | 14.8% | `█████████` |
+| 1 – 3 days | 817 | 33.7% | `████████████████████` |
+| 3 – 7 days | 585 | 24.1% | `██████████████` |
+| 7 – 15 days | 331 | 13.6% | `████████` ⚠️ |
+| 15 – 30 days | 157 | 6.5% | `████` ⚠️ |
+| > 30 days | 178 | 7.3% | `████` ⚠️ |
+
+### 🎯 Risk scoring output
+
+| Entity | 🔴 High (≥ 50) | 🟠 Medium (30–49) | Repeat disputers (≥ 2) | Worklist |
+|:---|---:|---:|---:|:---|
+| Merchants | **234** | 385 | 381 | [`merchant_risk_scores.csv`](outputs/risk/merchant_risk_scores.csv) |
+| Users | **100** | 230 | 184 | [`user_risk_scores.csv`](outputs/risk/user_risk_scores.csv) |
+| Dispute rings | **121** clusters | — | — | [`suspicious_clusters.csv`](outputs/risk/suspicious_clusters.csv) |
+
+<details>
+<summary><b>Top 5 highest-risk merchants</b> (score 80)</summary>
+
+| Merchant | Category | In master? | Payments | Chargebacks | Disputed | Fraud-type | Why flagged |
+|:---|:---|:---|---:|---:|---:|---:|:---|
+| `MCH3478` | Grocery | ❌ not in master | 3 | 3 | ₹31,214 | 1 | repeat disputes · 67% CB ratio · top-10% amount |
+| `MCH9572` | Grocery | ❌ not in master | 4 | 5 | ₹23,982 | 3 | repeat disputes · 50% CB ratio · top-10% amount |
+| `MCH8540` | Grocery | ✅ active | 3 | 3 | ₹22,249 | 2 | repeat disputes · no settlement account |
+| `MCH4342` | Grocery | ⚠️ inactive | 4 | 2 | ₹21,882 | 1 | transacting while inactive · no settlement account |
+| `MCH6538` | Grocery | ❌ not in master | 4 | 3 | ₹17,815 | 1 | repeat disputes · 50% CB ratio · top-10% amount |
+
+</details>
+
+<details>
+<summary><b>Top 3 suspicious dispute rings</b></summary>
+
+| Ring | Users | Merchants | Payments | Chargebacks | Fraud-type | Unverified users | Hub | Score |
+|:---|---:|---:|---:|---:|---:|---:|:---|---:|
+| `CL001` | 6 | 4 | 9 | 8 | 4 | 4 | `MCH1366` | **34.0** |
+| `CL002` | 6 | 5 | 10 | 7 | 2 | 5 | `MCH1949` | 26.9 |
+| `CL003` | 3 | 3 | 5 | 5 | 3 | 3 | `MCH5134` | 24.0 |
+
+</details>
+
+### ✅ Signals ruled out
+
+| Hypothesis | Result | Verdict |
+|:---|:---|:---:|
+| Missing UTR predicts failure or dispute | failed 9.7% vs 9.8% · disputed 12.6% vs 12.2% | ❌ no signal |
+| Failures cluster at peak hours / batch windows | 8–11% every hour of the day | ❌ systemic, not load |
+| Merchant volume spikes precede disputes | 2 spike days, 0 follow-on disputes | ❌ not present |
+| "Duplicate debit" complaints match duplicate ledger rows | 0 repeats within 24 h after de-dup | ❌ duplication was in the raw feed |
 
 ---
 
@@ -170,7 +321,7 @@ Small books: Apparel 17.0% (n=147), Misc Retail 13.6% (n=132), Department Stores
 
 ## 4. Insights for the business
 
-1. **The biggest control gap is identity, not fraud modelling.** 67.6% of payment value (₹16.95 Cr) comes from
+1. **The biggest control gap is identity, not fraud modelling.** 67.6% of payments (₹16.95 Cr, 67.9% of value) come from
    users with no KYC record, and 6,288 customer IDs resolve to more than one person. Fix onboarding and ID
    hygiene before tuning detection rules.
 2. **Rejected-KYC customers are still transacting — and disputing more.** Dispute rate 15.0% for rejected users,
