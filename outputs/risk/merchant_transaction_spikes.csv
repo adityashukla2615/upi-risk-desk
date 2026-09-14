@@ -1,0 +1,3 @@
+merchant_id,txn_date,day_txns,total_txns,active_days,baseline_per_active_day,disputes_within_14d,disputed_amount_14d,day_amount,merchant_name,merchant_status
+MCH4221,2026-02-09,3,4,2,1.0,0.0,0.0,26663.010000000002,"Rastogi, Goda and Naidu",ACTIVE
+MCH7878,2026-01-22,3,3,1,0.0,0.0,0.0,24427.15,,

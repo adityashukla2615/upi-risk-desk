@@ -1,0 +1,71 @@
+table,check,rows_affected,action
+kyc,exact duplicate rows,278,removed
+kyc,user_id non-canonical format (usr_/USR-/space/bare digits),12817,standardized to USR#####
+kyc,user_id unparseable,0,excluded from dimension (no key)
+kyc,PAN with spaces/hyphens/lowercase,8597,stripped and upper-cased
+kyc,PAN missing,1883,pan_status=MISSING
+kyc,PAN invalid pattern (not AAAAA9999A),2631,"value nulled, pan_status=INVALID"
+kyc,Aadhaar missing,2641,aadhaar_status=MISSING
+kyc,Aadhaar invalid length (10/13 digits),3237,aadhaar_status=INVALID; only last-4 stored for privacy
+kyc,Aadhaar pre-masked XXXX-XXXX-####,2896,aadhaar_status=MASKED
+kyc,DOB impossible (age <18 or >100 at 2026-03-31),0,"dob nulled, dob_invalid=True"
+kyc,"city alias/case variants (Bombay, BLR, Dilli...)",25212,mapped to canonical city
+kyc,city/state inconsistent,0,flagged
+kyc,income with ₹/Rs./INR/commas/k-suffix,15667,parsed to numeric INR
+kyc,income missing / 'Not Available',4684,left null (not imputed)
+kyc,income negative,1451,"sign error -> absolute value, flagged"
+kyc,signup timestamp missing,2886,left null
+kyc,signup after data window (future),0,flagged signup_in_future
+kyc,"kyc_status variants (V, APPROVED, KYC_DONE, R, ...)",36122,mapped to VERIFIED/PENDING/IN_REVIEW/REJECTED
+kyc,"ID collisions (same normalized ID, conflicting attributes)",13316,all rows kept in *_all_records.csv; dimension uses most-recent then most-complete record; id_record_count flags ambiguity
+merchants,exact duplicate rows,12,removed
+merchants,merchant_id non-canonical format,1907,standardized to MCH####
+merchants,"merchant name typos (digit-for-letter, joined LLC, case)",2185,normalized
+merchants,"MCC formatted as MCC-####, 0####, ####.0",1452,stripped to 4-digit int
+merchants,MCC missing/'misc'/'NA'/'UNKNOWN',692,inferred from merchant_category (1:1 mapping verified)
+merchants,MCC contradicts category text,0,"MCC code trusted, flagged"
+merchants,category text variants (82 spellings),6198,collapsed to 10 MCC-aligned categories
+merchants,onboarding date missing,499,left null
+merchants,onboarding date after data window,0,flagged
+merchants,"settlement account missing ('', NA)",2445,flagged - payout risk
+merchants,"merchant_status variants (Enabled, Live, A, Hold, ...)",6198,mapped to ACTIVE/INACTIVE/CLOSED/SUSPENDED/BLOCKED
+merchants,declared ticket size negative,501,"absolute value, flagged"
+merchants,"ID collisions (same normalized ID, conflicting attributes)",3262,all rows kept in *_all_records.csv; dimension uses most-recent then most-complete record; id_record_count flags ambiguity
+transactions,"timestamp in non-ISO format (DD/MM, MM-DD AM/PM, epoch, date-only)",9110,parsed with per-format rules
+transactions,timestamp date-only (no time),1012,"kept for daily metrics, excluded from hourly"
+transactions,timestamp unparseable,0,left null
+transactions,timestamp outside 2026-01-01..2026-03-31,0,flagged
+transactions,amount with ₹/Rs./INR/commas,8141,parsed to numeric INR
+transactions,amount negative,429,"treated as sign error -> absolute value, flagged (no refund status exists)"
+transactions,amount blank/invalid,0,"kept, excluded from value metrics"
+transactions,UTR with spaces/hyphens,1881,stripped
+transactions,UTR missing,1024,utr_status=MISSING (kept)
+transactions,UTR invalid format,0,utr_status=INVALID (kept)
+transactions,"status variants (S, TXN_SUCCESS, Declined, Initiated...)",20400,mapped to SUCCESS/FAILED/PENDING
+transactions,duplicate transaction rows,400,"removed (would inflate value by INR 5,186,378)"
+transactions,same txn_id with different content,0,removed (kept first)
+transactions,MCC blank,2872,"filled from merchant master where linked (1356), else Unknown"
+transactions,txn MCC differs from merchant master MCC,7426,"txn MCC kept (point-in-time), flagged"
+transactions,user_id not found in KYC (orphan FK),13522,kept; kyc_status = NO_KYC_RECORD
+transactions,merchant_id not found in merchant master (orphan FK),10369,kept; category from txn MCC
+transactions,same UTR reused across different txn_ids,0,flagged
+chargebacks,exact duplicate complaints,84,removed
+chargebacks,duplicate complaint_id with differing content,0,removed (kept first)
+chargebacks,"txn_id format variants (TXN-, short TXN#####)",295,normalized to TXN########
+chargebacks,txn_id missing,77,"kept, excluded from ratio numerators"
+chargebacks,txn_id not found in transactions (orphan FK),116,"kept, excluded from ratio numerators"
+chargebacks,user_id format variants,995,standardized to USR#####
+chargebacks,complaint user_id differs from linked transaction's user,2607,transaction is source of truth for attribution; reported IDs retained
+chargebacks,complaint merchant_id differs from linked transaction's merchant,2607,transaction is source of truth for attribution; reported IDs retained
+chargebacks,disputed amount with ₹/Rs./INR/commas (string),1304,parsed to numeric INR
+chargebacks,disputed amount blank,179,"imputed with linked txn amount (163), else null"
+chargebacks,disputed amount negative,220,"absolute value, flagged"
+chargebacks,disputed amount exceeds transaction amount,329,flagged (possible over-claim)
+chargebacks,complaint transaction_timestamp missing,230,filled from linked transaction (208)
+chargebacks,complaint's transaction date differs from linked txn by >1 day,2318,complaint date used for delay; linked_txn_timestamp retained
+chargebacks,reported timestamp missing,203,delay left null
+chargebacks,complaint reported before transaction (impossible),149,"delay nulled, flagged"
+chargebacks,bank response before complaint (impossible),0,"response time nulled, flagged"
+chargebacks,reason_code variants (34 spellings),2800,mapped to 8 reason categories
+chargebacks,complaint text case/abbreviation/trailing-noise variants,808,normalized; trailing notes moved to complaint_text_note
+chargebacks,"severity (P1..P4, H/M/L, CRIT) / resolution / channel variants",2800,mapped to canonical enums

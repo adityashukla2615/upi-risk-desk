@@ -1,0 +1,2011 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI Risk Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --ground: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f6f8fa;
+  --ink: #111c27;
+  --ink-2: #4a5866;
+  --ink-3: #74828f;
+  --line: #dbe1e7;
+  --grid: #e8ecf0;
+  --accent: #2a78d6;
+  --accent-soft: #e3eefb;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --muted-mark: #b9c3cc;
+  --good: #1a8f5a;
+  --warn: #c98500;
+  --crit: #d23f3f;
+  --good-soft: #e1f3ea;
+  --warn-soft: #fbf0d9;
+  --crit-soft: #fbe5e5;
+  --seq-1: #86b6ef; --seq-2: #5598e7; --seq-3: #2a78d6; --seq-4: #1c5cab;
+  --shadow: 0 1px 2px rgba(17, 28, 39, .06), 0 0 0 1px var(--line);
+  --scrim: rgba(17, 28, 39, .38);
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0d1218; --surface: #151c24; --surface-2: #1b242e; --ink: #e8edf2; --ink-2: #a9b5c1; --ink-3: #7d8a97;
+    --line: #26313c; --grid: #212b35; --accent: #3987e5; --accent-soft: #1a2c42;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --muted-mark: #3c4855;
+    --good: #3dbb7f; --warn: #e0a52a; --crit: #ec6a6a; --good-soft: #15302a; --warn-soft: #33290f; --crit-soft: #3a1c1f;
+    --seq-1: #184f95; --seq-2: #256abf; --seq-3: #3987e5; --seq-4: #86b6ef;
+    --shadow: 0 0 0 1px var(--line); --scrim: rgba(0, 0, 0, .55);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0d1218; --surface: #151c24; --surface-2: #1b242e; --ink: #e8edf2; --ink-2: #a9b5c1; --ink-3: #7d8a97;
+  --line: #26313c; --grid: #212b35; --accent: #3987e5; --accent-soft: #1a2c42;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --muted-mark: #3c4855;
+  --good: #3dbb7f; --warn: #e0a52a; --crit: #ec6a6a; --good-soft: #15302a; --warn-soft: #33290f; --crit-soft: #3a1c1f;
+  --seq-1: #184f95; --seq-2: #256abf; --seq-3: #3987e5; --seq-4: #86b6ef;
+  --shadow: 0 0 0 1px var(--line); --scrim: rgba(0, 0, 0, .55);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--ground); color: var(--ink); font: 400 14px/1.5 var(--f-body); margin: 0; padding-inline: 20px; }
+body.locked { overflow: hidden; }
+.wrap { max-width: 1260px; margin: 0 auto; padding-block: 0 64px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.005em; }
+.mono, code { font-family: var(--f-mono); font-size: .92em; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- masthead */
+.mast { display: grid; grid-template-columns: 1fr auto; gap: 8px 32px; align-items: end; padding-block: 28px 18px; }
+.mast .eyebrow, .dr-head .eyebrow { font: 500 11px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+.mast .eyebrow i { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); display: inline-block; }
+.mast h1 { font-size: clamp(30px, 4.2vw, 44px); font-weight: 700; line-height: 1; }
+.mast p { margin: 10px 0 0; color: var(--ink-2); max-width: 70ch; }
+.mast .meta { font: 400 12px/1.7 var(--f-mono); color: var(--ink-3); text-align: right; display: grid; gap: 8px; justify-items: end; }
+.mast .meta b { color: var(--ink); font-weight: 500; }
+
+/* ---------- controls */
+button, input, select { font: inherit; }
+.mini { font: 500 12px/1 var(--f-body); color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
+.mini:hover { color: var(--ink); border-color: var(--ink-3); }
+.mini[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.mini.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+select, input[type="date"], input[type="number"], input[type="search"] { font: 500 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0; }
+input[type="number"] { width: 92px; }
+input[type="search"] { width: 220px; max-width: 100%; }
+label.check { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; cursor: pointer; }
+
+.filters { background: var(--surface); box-shadow: var(--shadow); border-radius: 10px; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+.fld { display: grid; gap: 4px; min-width: 0; }
+.fld > span { font: 500 10.5px/1 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.fld .pair { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.fld .pair em { font-style: normal; color: var(--ink-3); font-size: 12px; }
+.filters .grow { flex: 1 1 auto; display: flex; justify-content: flex-end; gap: 8px; align-items: end; flex-wrap: wrap; }
+#search-msg { font-size: 12px; color: var(--crit); min-height: 1em; }
+
+.sticky { position: sticky; top: 0; z-index: 6; background: color-mix(in srgb, var(--ground) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin-top: 12px; }
+nav.jump { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px 2px; scrollbar-width: none; }
+nav.jump a { font: 500 12.5px/1 var(--f-body); color: var(--ink-2); text-decoration: none; padding: 7px 10px; border-radius: 6px; white-space: nowrap; }
+nav.jump a:hover { background: var(--surface); color: var(--ink); }
+.slicebar { display: flex; gap: 8px; align-items: center; padding-block: 6px 9px; overflow-x: auto; scrollbar-width: thin; }
+.slicebar .count { font: 500 12px/1 var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.slicebar .count b { color: var(--ink); }
+.fchip { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-soft); color: var(--ink); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 12px; white-space: nowrap; }
+.fchip .k { color: var(--ink-3); font: 500 10.5px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
+.fchip button { border: 0; background: var(--surface); color: var(--ink-2); width: 20px; height: 20px; border-radius: 50%; cursor: pointer; line-height: 1; padding: 0; }
+.fchip button:hover { color: var(--crit); }
+.hint { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+
+/* ---------- KPI ledger */
+.ledger { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); box-shadow: var(--shadow); border-radius: 10px; margin-block: 18px 26px; overflow: hidden; }
+.kpi { padding: 16px 18px 15px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; gap: 4px; align-content: start; }
+.kpi:nth-child(4n) { border-right: 0; }
+.kpi:nth-last-child(-n+4) { border-bottom: 0; }
+.kpi .lbl { font: 500 11px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.kpi .val { font: 600 28px/1.1 var(--f-display); }
+.kpi .sub { font-size: 12.5px; color: var(--ink-2); }
+.kpi .sub b { font-weight: 600; color: var(--ink); }
+
+/* ---------- findings */
+details.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary h2 { font-size: 24px; font-weight: 600; }
+details.fold > summary .note::after { content: "Hide"; }
+details.fold:not([open]) > summary .note::after { content: "Show"; }
+.findings { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 10px; }
+.finding { background: var(--surface); padding: 16px 18px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-content: start; }
+.finding .pill { grid-row: span 2; align-self: start; margin-top: 2px; }
+.finding h3 { font-size: 16.5px; font-weight: 600; line-height: 1.3; }
+.finding p { margin: 0; color: var(--ink-2); font-size: 13.5px; max-width: 62ch; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 600 10.5px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px 5px 7px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.crit { color: var(--crit); background: var(--crit-soft); }
+.pill.warn { color: var(--warn); background: var(--warn-soft); }
+.pill.good { color: var(--good); background: var(--good-soft); }
+.pill.info { color: var(--accent); background: var(--accent-soft); }
+.pill.plain { color: var(--ink-2); background: var(--surface-2); }
+.static { font: 500 10px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border: 1px dashed var(--line); border-radius: 4px; padding: 3px 5px; white-space: nowrap; }
+
+/* ---------- sections + panels */
+section.block { margin-top: 38px; scroll-margin-top: 110px; }
+.block-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 24px; align-items: end; margin-bottom: 14px; }
+.block-head h2 { font-size: 24px; font-weight: 600; }
+.block-head .lede { grid-column: 1 / -1; margin: 0; color: var(--ink-2); max-width: 82ch; }
+.block-head .lede b { color: var(--ink); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+.panel { background: var(--surface); box-shadow: var(--shadow); border-radius: 10px; padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-7 { grid-column: span 7; } .span-6 { grid-column: span 6; } .span-5 { grid-column: span 5; } .span-4 { grid-column: span 4; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.panel-head .tools { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.panel h3 { font-size: 15.5px; font-weight: 600; }
+.note { font-size: 12px; color: var(--ink-3); }
+.chart { position: relative; height: 240px; }
+.chart.tall { height: 320px; }
+.chart.short { height: 190px; }
+.chart.brushable canvas { cursor: crosshair; touch-action: pan-y; }
+.brush { position: absolute; background: color-mix(in srgb, var(--accent) 16%, transparent); border-inline: 1px solid var(--accent); pointer-events: none; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.legend i.line { height: 2px; width: 14px; border-radius: 1px; }
+.legend i.dash { height: 0; width: 14px; border-top: 2px dashed var(--ink-3); background: none; }
+.legend i.dot { border-radius: 50%; }
+
+/* ---------- tables */
+.table-wrap { overflow-x: auto; margin-inline: -18px; padding-inline: 18px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { font: 500 10.5px/1.2 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th button.sort { all: unset; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+th button.sort:hover { color: var(--ink); }
+th button.sort:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+th .ar { font-size: 9px; color: var(--accent); min-width: 8px; }
+td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th.r, td.r { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--surface-2); }
+tbody tr.sel td { background: var(--accent-soft); }
+td .id, button.id { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+button.id { cursor: pointer; line-height: 1.4; }
+button.id:hover { border-color: var(--accent); color: var(--accent); }
+td .sub { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+.dim { color: var(--ink-3); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 420px; }
+.chip { font-size: 11px; line-height: 1.2; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+.bar-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.bar-cell .b { height: 6px; border-radius: 3px; background: var(--s1); min-width: 2px; }
+.dt-bar { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.dt-bar .dt-extra { display: contents; }
+.dt-bar .dt-count { margin-left: auto; }
+.dt-pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; font-size: 12px; color: var(--ink-3); }
+.empty { padding: 18px 10px; color: var(--ink-3); text-align: center; }
+
+.seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 7px; padding: 2px; gap: 2px; flex-wrap: wrap; }
+.seg button { font: 500 12px/1 var(--f-body); color: var(--ink-2); background: none; border: 0; border-radius: 5px; padding: 7px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
+
+.statline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: 8px; overflow: hidden; }
+.statline div { background: var(--surface-2); padding: 10px 12px; }
+.statline .lbl { font: 500 10.5px/1.2 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.statline .v { font: 600 20px/1.2 var(--f-display); }
+.method { font-size: 13px; color: var(--ink-2); display: grid; gap: 8px; }
+.method p { margin: 0; max-width: 72ch; }
+.method b { color: var(--ink); }
+
+/* ---------- heatmap */
+.heat { display: grid; grid-template-columns: 38px repeat(24, minmax(0, 1fr)); gap: 2px; align-items: center; }
+.heat .hl, .heat .dl { font: 500 10.5px/1 var(--f-mono); color: var(--ink-3); background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: center; }
+.heat .dl { text-align: left; }
+.heat .hl:hover, .heat .dl:hover { color: var(--ink); }
+.heat .cell { height: 22px; border: 0; border-radius: 3px; padding: 0; cursor: pointer; }
+.heat .cell:hover { outline: 2px solid var(--ink); outline-offset: -1px; }
+.heat .cell.off { opacity: .28; }
+.heat .cell.on { outline: 2px solid var(--ink); outline-offset: -1px; }
+.scale { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
+.scale i { width: 140px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--s1) 8%, var(--surface-2)), var(--s1)); }
+
+/* ---------- network */
+.net { width: 100%; height: auto; display: block; background: var(--surface-2); border-radius: 8px; }
+.net .e { stroke: var(--line); stroke-width: 1.2; }
+.net .e.d { stroke: var(--s2); stroke-width: 2; }
+.net .node circle, .net .node rect { fill: var(--muted-mark); stroke: var(--surface-2); stroke-width: 2; }
+.net .node.cb circle, .net .node.cb rect { fill: var(--s2); }
+.net .node.c circle, .net .node.c rect { fill: var(--s1); }
+.net .node[role="button"] { cursor: pointer; }
+.net .node[role="button"]:hover circle, .net .node[role="button"]:hover rect, .net .node:focus-visible circle, .net .node:focus-visible rect { stroke: var(--ink); }
+.net .node:focus { outline: none; }
+.net text { font: 500 10px var(--f-mono); fill: var(--ink-2); }
+
+/* ---------- tooltip */
+.tip { position: fixed; z-index: 30; pointer-events: none; background: var(--ink); color: var(--surface); border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.45; max-width: 260px; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+.tip b { font-weight: 600; font-size: 13px; }
+
+/* ---------- drawer */
+.backdrop { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(680px, 100vw); background: var(--surface); z-index: 21; overflow-y: auto; box-shadow: -8px 0 32px rgba(0,0,0,.18); padding: 0 22px 40px; display: flex; flex-direction: column; gap: 14px; }
+.dr-bar { position: sticky; top: 0; background: var(--surface); display: flex; gap: 10px; align-items: center; padding-block: 12px; border-bottom: 1px solid var(--line); z-index: 1; }
+.dr-bar .note { flex: 1; font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+#dr-body { display: flex; flex-direction: column; gap: 14px; }
+.dr-head h2 { font-size: 28px; font-weight: 700; font-family: var(--f-mono); letter-spacing: -.02em; }
+.dr-head p { margin: 6px 0 10px; color: var(--ink-2); }
+.dr-head .pills { display: flex; gap: 6px; flex-wrap: wrap; }
+#dr-body h3 { font-size: 15px; font-weight: 600; margin-top: 6px; }
+#dr-body .table-wrap { margin-inline: -22px; padding-inline: 22px; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 13px; }
+.kv dt { color: var(--ink-3); font: 500 11px/1.8 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
+.kv dd { margin: 0; }
+
+/* ---------- interaction extras */
+a.kpi { color: inherit; text-decoration: none; }
+a.kpi:hover { background: var(--surface-2); }
+.delta { font: 600 11.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 4px; white-space: nowrap; vertical-align: middle; margin-left: 6px; }
+.delta.bad { color: var(--crit); background: var(--crit-soft); }
+.delta.good { color: var(--good); background: var(--good-soft); }
+.delta.flat { color: var(--ink-2); background: var(--surface-2); }
+.mini:disabled { opacity: .4; cursor: default; }
+.legend button.tg { all: unset; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 4px; }
+.legend button.tg[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.legend button.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.kbd-help { position: fixed; right: 20px; bottom: 20px; z-index: 25; background: var(--surface); box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 0 0 1px var(--line); border-radius: 10px; padding: 14px 16px; width: min(320px, calc(100vw - 32px)); }
+.kbd-help h3 { font-size: 14px; margin-bottom: 10px; }
+.kbd-help .kv dt { text-transform: none; letter-spacing: 0; }
+kbd { font: 500 11px/1 var(--f-mono); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 2px 5px; }
+
+footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 12px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 980px) {
+  .span-8, .span-7, .span-6, .span-5, .span-4 { grid-column: span 12; }
+  .ledger { grid-template-columns: repeat(2, 1fr); }
+  .kpi:nth-child(4n) { border-right: 1px solid var(--line); }
+  .kpi:nth-child(2n) { border-right: 0; }
+  .kpi:nth-last-child(-n+4) { border-bottom: 1px solid var(--line); }
+  .kpi:nth-last-child(-n+2) { border-bottom: 0; }
+  .findings { grid-template-columns: 1fr; }
+  .filters .grow { justify-content: flex-start; }
+}
+@media (max-width: 560px) {
+  body { padding-inline: 16px; }
+  .mast { grid-template-columns: 1fr; }
+  .mast .meta { text-align: left; justify-items: start; }
+  .ledger { grid-template-columns: 1fr; }
+  .kpi, .kpi:nth-child(n) { border-right: 0; border-bottom: 1px solid var(--line); }
+  .kpi:last-child { border-bottom: 0; }
+  .statline { grid-template-columns: repeat(2, 1fr); }
+  .chart.tall { height: 380px; }
+  .heat { grid-template-columns: 30px repeat(24, minmax(0, 1fr)); gap: 1px; }
+  .heat .cell { height: 16px; border-radius: 2px; }
+  .drawer { padding-inline: 16px; }
+  #dr-body .table-wrap { margin-inline: -16px; padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow"><i></i>Track 1 · UPI fraud ring &amp; merchant analytics</div>
+      <h1>UPI Risk Desk</h1>
+      <p>Payments, disputes and merchant risk across one quarter of UPI traffic. Filter anything, click any bar to cross-filter, drag across a daily chart to zoom, step through periods to see KPI changes, and open any merchant, user or cluster for its full story. Pin the ones you care about to the watchlist. Press <kbd>?</kbd> for shortcuts.</p>
+    </div>
+    <div class="meta"><div id="mast-meta"></div><button type="button" class="mini" id="theme-btn">Theme: system</button></div>
+  </header>
+
+  <form class="filters" id="filters" onsubmit="return false" aria-label="Filters">
+    <label class="fld"><span>Period</span><select id="f-preset"></select></label>
+    <div class="fld"><span>Date range</span><div class="pair"><button type="button" class="mini" id="f-prev" aria-label="Previous period" title="Previous period  [">◀</button><input type="date" id="f-from" aria-label="From date"><em>to</em><input type="date" id="f-to" aria-label="To date"><button type="button" class="mini" id="f-next" aria-label="Next period" title="Next period  ]">▶</button></div></div>
+    <label class="fld"><span>Category</span><select id="f-cat"></select></label>
+    <label class="fld"><span>Status</span><select id="f-st"></select></label>
+    <label class="fld"><span>KYC</span><select id="f-kyc"></select></label>
+    <label class="fld"><span>Risk segment</span><select id="f-seg"></select></label>
+    <label class="fld"><span>UTR</span><select id="f-utr"></select></label>
+    <label class="fld"><span>Dispute reason</span><select id="f-rs"></select></label>
+    <div class="fld"><span>Amount ₹</span><div class="pair"><input type="number" id="f-amin" min="0" step="100" placeholder="min" aria-label="Minimum amount"><em>–</em><input type="number" id="f-amax" min="0" step="100" placeholder="max" aria-label="Maximum amount"></div></div>
+    <label class="check"><input type="checkbox" id="f-disp"> Disputed only</label>
+    <div class="grow">
+      <div class="fld"><span>Look up ID</span><input type="search" id="search" placeholder="USR12345 · MCH1234 · TXN… · CBK… · CL001" aria-describedby="search-msg"><div id="search-msg" role="status"></div></div>
+      <button type="button" class="mini" id="f-link" title="Copy a link to this exact view">Copy link</button>
+      <button type="button" class="mini" id="kbd-btn" aria-label="Keyboard shortcuts" aria-controls="kbd-help">?</button>
+      <button type="button" class="mini primary" id="f-reset">Reset all</button>
+    </div>
+  </form>
+
+  <div class="sticky">
+    <nav class="jump" aria-label="Sections">
+      <a href="#findings">Findings</a><a href="#volume">Volume</a><a href="#failures">Failures</a><a href="#categories">Categories</a>
+      <a href="#disputes">Disputes</a><a href="#kyc">KYC</a><a href="#merchants">Merchant risk</a><a href="#users">User risk</a><a href="#watch">Watchlist</a>
+      <a href="#clusters">Clusters</a><a href="#quality">Data quality</a>
+    </nav>
+    <div class="slicebar" aria-live="polite"><span class="count" id="slice-count"></span><span id="chips" style="display:contents"></span></div>
+  </div>
+
+  <div class="ledger" id="kpis"></div>
+
+  <details class="fold block" id="findings" open>
+    <summary><h2>What the risk team should act on</h2><span class="static">Whole quarter</span><span class="note"></span></summary>
+    <div class="findings" id="finding-list"></div>
+  </details>
+
+  <section id="volume" class="block">
+    <div class="block-head"><h2>Transaction volume</h2><p class="lede" id="vol-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Daily transactions</h3><div class="tools"><div class="legend"><span><i class="line" style="background:var(--s1)"></i>Daily count</span><span><i class="dash"></i>7-day average</span><span id="leg-prior" hidden><i class="line" style="background:var(--s2)"></i>Prior period</span></div></div></div>
+        <div class="chart brushable"><canvas id="c-daily-count" aria-label="Daily transaction count" role="img"></canvas></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Daily value</h3><div class="tools"><span class="note">₹ lakh per day</span></div></div>
+        <div class="chart brushable"><canvas id="c-daily-value" aria-label="Daily transaction value" role="img"></canvas></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Successful vs failed vs pending, by day</h3>
+          <div class="tools"><div class="legend"><span><i style="background:var(--muted-mark)"></i>Success</span><span><i style="background:var(--crit)"></i>Failed</span><span><i style="background:var(--warn)"></i>Pending</span></div><span class="hint">Drag to zoom · click a day to isolate it</span></div></div>
+        <div class="chart brushable"><canvas id="c-daily-status" aria-label="Daily transactions by status" role="img"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="failures" class="block">
+    <div class="block-head"><h2>Failure pattern</h2><p class="lede" id="fail-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-7">
+        <div class="panel-head"><h3>Failed-transaction rate by day</h3><div class="tools"><div class="legend"><span><i class="line" style="background:var(--crit)"></i>Failed rate</span><span><i class="dash"></i>Slice average</span></div></div></div>
+        <div class="chart brushable"><canvas id="c-fail-day" aria-label="Failed rate by day" role="img"></canvas></div>
+      </div>
+      <div class="panel span-5">
+        <div class="panel-head"><h3>Failed rate by hour</h3><div class="tools"><span class="note">click a bar to filter</span></div></div>
+        <div class="chart"><canvas id="c-fail-hour" aria-label="Failed rate by hour" role="img"></canvas></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>When payments happen</h3>
+          <div class="tools">
+            <div class="seg" role="group" aria-label="Heatmap measure" id="heat-metric">
+              <button type="button" data-k="txns" aria-pressed="true">Transactions</button>
+              <button type="button" data-k="failed" aria-pressed="false">Failed rate</button>
+              <button type="button" data-k="disputed" aria-pressed="false">Dispute rate</button>
+            </div>
+            <span class="scale" id="heat-scale"></span>
+          </div></div>
+        <div class="heat" id="heat" role="grid" aria-label="Weekday by hour heatmap"></div>
+        <p class="note" style="margin:0">Weekday × hour of day. Click a cell to filter to that slot, a day label for the weekday, or an hour label for the hour. Date-only timestamps are excluded.</p>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Missing UTR vs valid UTR</h3><div class="tools"><span class="note">does a missing bank reference predict failure or dispute? click a row to filter</span></div></div>
+        <div class="table-wrap"><table id="t-utr"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="categories" class="block">
+    <div class="block-head"><h2>Merchant categories</h2><p class="lede" id="cat-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Transaction amount by category</h3><div class="tools"><span class="note">₹ crore · click to filter</span></div></div>
+        <div class="chart tall"><canvas id="c-cat-amount" aria-label="Amount by category" role="img"></canvas></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Chargeback-to-transaction ratio</h3><div class="tools"><div class="legend"><span><i style="background:var(--s2)"></i>Above slice average</span><span><i style="background:var(--muted-mark)"></i>At or below</span></div></div></div>
+        <div class="chart tall"><canvas id="c-cat-ratio" aria-label="Chargeback ratio by category" role="img"></canvas></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Category performance</h3><div class="tools"><span class="note">click a row to filter</span></div></div>
+        <div id="t-cat"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="disputes" class="block">
+    <div class="block-head"><h2>Disputes and chargebacks</h2><p class="lede" id="disp-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-7">
+        <div class="panel-head"><h3>Chargeback reasons</h3><div class="tools"><div class="legend"><span><i style="background:var(--s2)"></i>Fraud-type</span><span><i style="background:var(--s1)"></i>Service / billing</span></div></div></div>
+        <div class="chart tall"><canvas id="c-reasons" aria-label="Chargeback reason distribution" role="img"></canvas></div>
+      </div>
+      <div class="panel span-5">
+        <div class="panel-head"><h3>Severity</h3><div class="tools"><span class="note">click to filter</span></div></div>
+        <div class="chart short"><canvas id="c-severity" aria-label="Dispute severity distribution" role="img"></canvas></div>
+        <div class="panel-head" style="margin-top:6px"><h3>Resolution status</h3><div class="tools"><div class="legend"><span><i style="background:var(--warn)"></i>Still open</span><span><i style="background:var(--muted-mark)"></i>Closed out</span></div></div></div>
+        <div class="chart short"><canvas id="c-resolution" aria-label="Resolution status" role="img"></canvas></div>
+      </div>
+      <div class="panel span-4">
+        <div class="panel-head"><h3>Complaint channel</h3><div class="tools"><span class="note">click to filter</span></div></div>
+        <div class="chart"><canvas id="c-channel" aria-label="Complaint channel" role="img"></canvas></div>
+      </div>
+      <div class="panel span-8">
+        <div class="panel-head"><h3>Reporting delay</h3><div class="tools"><div class="legend"><span><i style="background:var(--s2)"></i>Reported after 7 days</span></div></div></div>
+        <div class="chart short"><canvas id="c-delay" aria-label="Reporting delay distribution" role="img"></canvas></div>
+        <div class="statline" id="delay-stats"></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Disputes reported more than 7 days after payment</h3><div class="tools"><span class="note">click a row for the complaint</span></div></div>
+        <div id="t-delayed"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kyc" class="block">
+    <div class="block-head"><h2>KYC and customer risk</h2><p class="lede" id="kyc-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-4">
+        <div class="panel-head"><h3>KYC status of customers</h3><div class="tools"><span class="static">All 28,920 customers</span></div></div>
+        <div class="chart"><canvas id="c-kyc" aria-label="KYC status distribution" role="img"></canvas></div>
+      </div>
+      <div class="panel span-8">
+        <div class="panel-head"><h3>Transactions and disputes by KYC status</h3><div class="tools"><span class="note">click a row to filter</span></div></div>
+        <div class="table-wrap"><table id="t-kyc"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="merchants" class="block">
+    <div class="block-head"><h2>Merchant risk</h2><p class="lede" id="m-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Merchants with disputes</h3>
+          <div class="tools"><div class="legend" id="m-tiers" role="group" aria-label="Show risk tiers"><button type="button" class="tg" data-t="HIGH" aria-pressed="true"><i class="dot" style="background:var(--crit)"></i>High tier</button><button type="button" class="tg" data-t="MEDIUM" aria-pressed="true"><i class="dot" style="background:var(--warn)"></i>Medium</button><button type="button" class="tg" data-t="LOW" aria-pressed="true"><i class="dot" style="background:var(--muted-mark)"></i>Low</button></div><span class="note">click a tier to hide it · click a dot to open the merchant</span></div></div>
+        <div class="chart tall"><canvas id="c-m-scatter" aria-label="Merchants by chargebacks and disputed amount" role="img"></canvas></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Merchants ranked</h3>
+          <div class="seg" role="group" aria-label="Rank merchants by" id="m-presets">
+            <button type="button" data-p="score" aria-pressed="true">Risk score</button>
+            <button type="button" data-p="cbs" aria-pressed="false">Chargebacks</button>
+            <button type="button" data-p="amt" aria-pressed="false">Disputed amount</button>
+            <button type="button" data-p="ratio" aria-pressed="false">Chargeback ratio (≥3 txns)</button>
+          </div></div>
+        <div id="t-merchants"></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Merchants with sudden transaction spikes</h3><div class="tools"><span class="static">Whole quarter</span><span class="note">day ≥3 txns and ≥3× usual volume; disputes in the next 14 days</span></div></div>
+        <div class="table-wrap"><table id="t-spikes"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="users" class="block">
+    <div class="block-head"><h2>User risk</h2><p class="lede" id="u-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Customers to review</h3><div class="tools"><span class="note">risk scores are computed on the whole quarter; activity columns follow the filters</span></div></div>
+        <div id="t-users"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="watch" class="block">
+    <div class="block-head"><h2>Watchlist</h2><p class="lede" id="w-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Pinned merchants and customers</h3><div class="tools"><span class="note">saved in this browser · activity follows the filters</span><button type="button" class="mini" id="w-clear">Clear all</button></div></div>
+        <div id="t-watch"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="clusters" class="block">
+    <div class="block-head"><h2>Suspicious clusters</h2><p class="lede" id="cl-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-7">
+        <div class="panel-head"><h3>Connected dispute rings</h3><div class="tools"><span class="note">click a row to draw it</span></div></div>
+        <div id="t-clusters"></div>
+      </div>
+      <div class="panel span-5">
+        <div class="panel-head"><h3 id="cl-graph-title">Ring graph</h3><div class="tools"><button type="button" class="mini" id="cl-open">Open details</button></div></div>
+        <div id="cl-graph"></div>
+        <div class="legend"><span><i class="dot" style="background:var(--muted-mark)"></i>User</span><span><i style="background:var(--muted-mark)"></i>Merchant</span><span><i style="background:var(--s2)"></i>Has chargebacks</span><span><i class="line" style="background:var(--s2)"></i>Disputed payment</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quality" class="block">
+    <div class="block-head"><h2>Data quality ledger</h2><p class="lede">Every repair applied before a single metric was calculated. Rows were only removed when they were duplicates; everything else is kept and flagged so the numbers above can be traced back.</p></div>
+    <div class="grid">
+      <div class="panel span-8">
+        <div class="panel-head"><h3>Checks and actions</h3><div class="tools"><span class="static">Whole dataset</span></div></div>
+        <div id="t-quality"></div>
+      </div>
+      <div class="panel span-4">
+        <div class="panel-head"><h3>How the numbers are built</h3></div>
+        <div class="method" id="method"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer><span>Synthetic data generated for the TransOrg AgentIQ Datathon. Not real customers, merchants or banks.</span><span class="mono">track1_upi_transactions · track1_kyc_records · track1_merchants_master · track1_chargebacks</span></footer>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dr-title">
+  <div class="dr-bar"><button type="button" class="mini" id="dr-back" hidden>← Back</button><span class="note" id="dr-kind"></span><button type="button" class="mini" id="dr-close">Close ✕</button></div>
+  <div id="dr-body"></div>
+</aside>
+<div class="tip" id="tip" hidden></div>
+<div class="kbd-help" id="kbd-help" hidden role="dialog" aria-label="Keyboard shortcuts">
+  <h3>Keyboard shortcuts</h3>
+  <dl class="kv">
+    <dt><kbd>/</kbd></dt><dd>Look up an ID</dd>
+    <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous / next period</dd>
+    <dt><kbd>R</kbd></dt><dd>Reset all filters</dd>
+    <dt><kbd>T</kbd></dt><dd>Cycle theme</dd>
+    <dt><kbd>Backspace</kbd></dt><dd>Back, inside the detail drawer</dd>
+    <dt><kbd>Esc</kbd></dt><dd>Close drawer or this panel</dd>
+    <dt><kbd>?</kbd></dt><dd>Toggle this panel</dd>
+  </dl>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+"use strict";
+const DATA = /*__DATA__*/null;
+const QUALITY = /*__QUALITY__*/null;
+const R = /*__ROWS__*/null;
+const K = DATA.kpi, C = DATA.counts, D = R.dict;
+const T = R.t, CB = R.c, U = R.users, M = R.merchants;
+const NT = T.id.length, NC = CB.id.length, NU = U.id.length, NM = M.id.length, DAYS = R.days;
+const $ = id => document.getElementById(id);
+
+/* ======================================================================= formatting (Indian numbering) */
+const nf = new Intl.NumberFormat("en-IN");
+const inr = v => {
+  if (v == null || isNaN(v)) return "—";
+  const a = Math.abs(v);
+  if (a >= 1e7) return "₹" + (v / 1e7).toFixed(2) + " Cr";
+  if (a >= 1e5) return "₹" + (v / 1e5).toFixed(2) + " L";
+  return "₹" + nf.format(Math.round(v));
+};
+const inrFull = v => v == null || isNaN(v) ? "—" : "₹" + nf.format(Math.round(v));
+const pct = (v, d = 1) => v == null || isNaN(v) ? "—" : (v * 100).toFixed(d) + "%";
+const int = v => v == null || isNaN(v) ? "—" : nf.format(Math.round(v));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const title = s => String(s ?? "").toLowerCase().replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+const byKey = (arr, k) => Object.fromEntries(arr.map(r => [r[k], r]));
+const hex2rgba = (h, a) => { const n = parseInt(h.replace("#", ""), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+
+const [SY, SM, SD] = R.start.split("-").map(Number);
+const START = Date.UTC(SY, SM - 1, SD);
+const dayDate = d => new Date(START + d * 864e5);
+const dayIso = d => dayDate(d).toISOString().slice(0, 10);
+const isoDay = s => Math.round((Date.parse(s + "T00:00:00Z") - START) / 864e5);
+const dayFmt = d => d == null ? "—" : dayDate(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" });
+const clampDay = d => Math.max(0, Math.min(DAYS - 1, d));
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], DOW_ROWS = [1, 2, 3, 4, 5, 6, 0];
+const START_DOW = dayDate(0).getUTCDay();
+const dowOf = d => ((START_DOW + d) % 7 + 7) % 7;
+const hourOf = i => T.mi[i] < 0 ? -1 : Math.floor(T.mi[i] / 60);
+const hh = h => String(h).padStart(2, "0");
+const timeFmt = i => T.mi[i] < 0 ? "date only" : `${hh(Math.floor(T.mi[i] / 60))}:${hh(T.mi[i] % 60)}`;
+const txnId = i => "TXN" + String(T.id[i]).padStart(8, "0");
+const cbId = j => "CBK" + String(CB.id[j]).padStart(7, "0");
+const catName = c => c >= 0 ? D.cat[c] : "Unknown";
+
+const ST_OK = D.status.indexOf("SUCCESS"), ST_FAIL = D.status.indexOf("FAILED"), ST_PEND = D.status.indexOf("PENDING");
+const TIER_HIGH = D.tier.indexOf("HIGH"), TIER_MED = D.tier.indexOf("MEDIUM");
+const OPEN_RES = new Set(["OPEN", "IN_PROGRESS", "PENDING_BANK"]);
+const KYC_ORDER = ["VERIFIED", "PENDING", "IN_REVIEW", "REJECTED", "NO_KYC_RECORD"];
+const SEV_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+
+/* ======================================================================= indexes */
+const txByU = Array.from({ length: NU }, () => []), txByM = Array.from({ length: NM }, () => []);
+for (let i = 0; i < NT; i++) { txByU[T.u[i]].push(i); txByM[T.m[i]].push(i); }
+const cbByT = new Map();
+for (let j = 0; j < NC; j++) if (CB.t[j] >= 0) { const a = cbByT.get(CB.t[j]); a ? a.push(j) : cbByT.set(CB.t[j], [j]); }
+const uCb = new Uint16Array(NU), mCb = new Uint16Array(NM);
+for (const [t, js] of cbByT) { uCb[T.u[t]] += js.length; mCb[T.m[t]] += js.length; }
+const uCl = new Int16Array(NU).fill(-1), mCl = new Int16Array(NM).fill(-1);
+R.clusters.forEach((c, ci) => { c.u.forEach(u => uCl[u] = ci); c.m.forEach(m => mCl[m] = ci); });
+const txCl = i => { const a = uCl[T.u[i]]; return a >= 0 && a === mCl[T.m[i]] ? a : -1; };
+const cbCat = j => CB.t[j] >= 0 ? T.c[CB.t[j]] : CB.c[j];
+const cbKyc = j => CB.t[j] >= 0 ? T.k[CB.t[j]] : CB.k[j];
+const userKyc = u => txByU[u].length ? T.k[txByU[u][0]] : -1;
+const userSeg = u => txByU[u].length ? T.g[txByU[u][0]] : -1;
+const sigNames = (mask, dict) => D[dict].filter((_, b) => mask & (1 << b));
+const uIndex = new Map(U.id.map((v, i) => [v, i])), mIndex = new Map(M.id.map((v, i) => [v, i]));
+let txIndex = null, cbIndex = null;
+
+/* ======================================================================= filter model */
+const F0 = { from: 0, to: DAYS - 1, cat: -1, st: -1, kyc: -1, seg: -1, utr: -1, amin: null, amax: null, disp: 0, hr: -1, dow: -1, rs: -1, sv: -1, res: -1, ch: -1, mch: -1, usr: -1 };
+let F = { ...F0 };
+// filter keys a chart owns: that chart is computed ignoring its own keys, so the selection is highlighted instead of removing the alternatives
+const GROUP = { date: ["from", "to"], cat: ["cat"], st: ["st"], kyc: ["kyc"], utr: ["utr"], time: ["hr", "dow"], rs: ["rs"], sv: ["sv"], res: ["res"], ch: ["ch"] };
+const TXN_KEYS = ["from", "to", "cat", "st", "kyc", "seg", "utr", "amin", "amax", "disp", "hr", "dow", "mch", "usr"];
+const isFiltered = f => Object.keys(F0).some(k => f[k] !== F0[k]);
+
+function slice(f, ign = "") {
+  const skip = new Set(GROUP[ign] || []);
+  const on = k => !skip.has(k) && f[k] !== F0[k];
+  const rsOn = on("rs"), svOn = on("sv"), resOn = on("res"), chOn = on("ch");
+  const cbOk = j => (!rsOn || CB.r[j] === f.rs) && (!svOn || CB.sv[j] === f.sv) && (!resOn || CB.rs[j] === f.res) && (!chOn || CB.ch[j] === f.ch);
+  const hit = new Uint8Array(NT);
+  for (let j = 0; j < NC; j++) if (CB.t[j] >= 0 && cbOk(j)) hit[CB.t[j]] = 1;
+  const dOn = on("from") || on("to"), cOn = on("cat"), sOn = on("st"), kOn = on("kyc"), gOn = on("seg"), xOn = on("utr");
+  const hOn = on("hr"), wOn = on("dow"), loOn = on("amin"), hiOn = on("amax"), pOn = on("disp"), mOn = on("mch"), uOn = on("usr");
+  const tm = new Uint8Array(NT);
+  for (let i = 0; i < NT; i++) {
+    const d = T.d[i];
+    if (dOn && (d < f.from || d > f.to)) continue;
+    if (mOn && T.m[i] !== f.mch) continue;
+    if (uOn && T.u[i] !== f.usr) continue;
+    if (cOn && T.c[i] !== f.cat) continue;
+    if (sOn && T.s[i] !== f.st) continue;
+    if (kOn && T.k[i] !== f.kyc) continue;
+    if (gOn && T.g[i] !== f.seg) continue;
+    if (xOn && T.x[i] !== f.utr) continue;
+    if (hOn && hourOf(i) !== f.hr) continue;
+    if (wOn && (T.mi[i] < 0 || dowOf(d) !== f.dow)) continue;
+    const a = T.a[i];
+    if (loOn && !(a >= f.amin)) continue;
+    if (hiOn && !(a <= f.amax)) continue;
+    if (pOn && !hit[i]) continue;
+    tm[i] = 1;
+  }
+  // complaints with no usable txn_id have no date, category or user: they count only while no transaction filter is active
+  const unlinkedOk = TXN_KEYS.every(k => !on(k));
+  const cm = new Uint8Array(NC);
+  for (let j = 0; j < NC; j++) {
+    const t = CB.t[j];
+    if (t >= 0 ? !tm[t] : !unlinkedOk) continue;
+    if (cbOk(j)) cm[j] = 1;
+  }
+  return { tm, cm, hit };
+}
+
+function summarize(sl) {
+  let n = 0, amt = 0, an = 0, succAmt = 0, failed = 0, pending = 0, disp = 0;
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    n++;
+    const a = T.a[i];
+    if (a != null) { amt += a; an++; if (T.s[i] === ST_OK) succAmt += a; }
+    if (T.s[i] === ST_FAIL) failed++; else if (T.s[i] === ST_PEND) pending++;
+    if (sl.hit[i]) disp++;
+  }
+  let cbs = 0, cbAmt = 0, linkedAmt = 0, fraud = 0, open = 0;
+  const delays = [];
+  for (let j = 0; j < NC; j++) {
+    if (!sl.cm[j]) continue;
+    cbs++;
+    const a = CB.a[j] || 0;
+    cbAmt += a;
+    if (CB.t[j] >= 0) linkedAmt += a;
+    fraud += CB.fr[j]; open += CB.op[j];
+    if (CB.dl[j] != null) delays.push(CB.dl[j]);
+  }
+  delays.sort((a, b) => a - b);
+  const mid = delays.length >> 1;
+  return {
+    n, amt, avg: an ? amt / an : null, succAmt, failRate: n ? failed / n : 0, pendRate: n ? pending / n : 0, failed,
+    disp, ratio: n ? disp / n : 0, cbs, cbAmt, linkedAmt, amtRatio: amt ? linkedAmt / amt : 0,
+    fraudShare: cbs ? fraud / cbs : 0, openShare: cbs ? open / cbs : 0,
+    delayMean: delays.length ? delays.reduce((s, v) => s + v, 0) / delays.length : null,
+    delayMedian: delays.length ? (delays.length % 2 ? delays[mid] : (delays[mid - 1] + delays[mid]) / 2) : null,
+    late: delays.filter(v => v > 7).length,
+  };
+}
+const FULL = summarize(slice(F0));
+
+/* ======================================================================= filter controls */
+const PRESETS = [["q", "Whole quarter"]];
+{
+  const seen = new Set();
+  for (let d = 0; d < DAYS; d++) {
+    const iso = dayIso(d).slice(0, 7);
+    if (seen.has(iso)) continue;
+    seen.add(iso);
+    PRESETS.push(["m" + iso, dayDate(d).toLocaleDateString("en-IN", { month: "long", year: "numeric", timeZone: "UTC" })]);
+  }
+  PRESETS.push(["l30", "Last 30 days"], ["l7", "Last 7 days"], ["custom", "Custom range"]);
+}
+function presetRange(p) {
+  if (p === "q") return [0, DAYS - 1];
+  if (p === "l30") return [Math.max(0, DAYS - 30), DAYS - 1];
+  if (p === "l7") return [Math.max(0, DAYS - 7), DAYS - 1];
+  if (p[0] === "m") {
+    const [y, mo] = p.slice(1).split("-").map(Number);
+    return [clampDay(Math.round((Date.UTC(y, mo - 1, 1) - START) / 864e5)), clampDay(Math.round((Date.UTC(y, mo, 0) - START) / 864e5))];
+  }
+  return null;
+}
+const presetOf = f => (PRESETS.find(([p]) => { const r = presetRange(p); return r && r[0] === f.from && r[1] === f.to; }) || ["custom"])[0];
+
+const opt = (v, label) => `<option value="${v}">${esc(label)}</option>`;
+const codeOptions = (dict, all, order, fmt = title) => opt(-1, all) + (order ? order.map(v => D[dict].indexOf(v)).filter(i => i >= 0) : D[dict].map((_, i) => i)).map(i => opt(i, fmt(D[dict][i]))).join("");
+$("f-preset").innerHTML = PRESETS.map(([v, l]) => opt(v, l)).join("");
+$("f-cat").innerHTML = codeOptions("cat", "All categories", [...D.cat].sort(), s => s);
+$("f-st").innerHTML = codeOptions("status", "Any status", ["SUCCESS", "FAILED", "PENDING"]);
+$("f-kyc").innerHTML = codeOptions("kyc", "Any KYC", KYC_ORDER.concat(D.kyc.filter(k => !KYC_ORDER.includes(k))));
+$("f-seg").innerHTML = codeOptions("seg", "Any segment", null);
+$("f-rs").innerHTML = codeOptions("reason", "Any reason", null);
+$("f-utr").innerHTML = codeOptions("utr", "Any UTR", ["VALID", "MISSING", "INVALID"]);
+for (const id of ["f-from", "f-to"]) { $(id).min = dayIso(0); $(id).max = dayIso(DAYS - 1); }
+
+function setF(patch) {
+  F = { ...F, ...patch };
+  if (F.from > F.to) [F.from, F.to] = [F.to, F.from];
+  writeHash();
+  render();
+}
+const toggle = (k, v) => setF({ [k]: F[k] === v ? -1 : v });
+$("f-preset").addEventListener("change", e => { const r = presetRange(e.target.value); if (r) setF({ from: r[0], to: r[1] }); });
+$("f-from").addEventListener("change", e => { const d = isoDay(e.target.value); if (!isNaN(d)) setF({ from: clampDay(d) }); });
+$("f-to").addEventListener("change", e => { const d = isoDay(e.target.value); if (!isNaN(d)) setF({ to: clampDay(d) }); });
+for (const [id, k] of [["f-cat", "cat"], ["f-st", "st"], ["f-kyc", "kyc"], ["f-seg", "seg"], ["f-utr", "utr"], ["f-rs", "rs"]])
+  $(id).addEventListener("change", e => setF({ [k]: +e.target.value }));
+for (const [id, k] of [["f-amin", "amin"], ["f-amax", "amax"]])
+  $(id).addEventListener("change", e => { const v = e.target.value.trim(); setF({ [k]: v === "" || isNaN(+v) ? null : Math.max(0, +v) }); });
+$("f-disp").addEventListener("change", e => setF({ disp: e.target.checked ? 1 : 0 }));
+$("f-reset").addEventListener("click", () => { F = { ...F0 }; writeHash(); render(); });
+
+// a calendar month steps to the neighbouring month; any other range shifts by its own length
+function stepRange(f, dir) {
+  const p = presetOf(f);
+  if (p[0] === "m") {
+    const months = PRESETS.filter(([v]) => v[0] === "m"), next = months[months.findIndex(([v]) => v === p) + dir];
+    return next ? presetRange(next[0]) : null;
+  }
+  const n = f.to - f.from + 1, from = f.from + dir * n, to = f.to + dir * n;
+  return from < 0 || to > DAYS - 1 ? null : [from, to];
+}
+const priorRange = f => f.from === F0.from && f.to === F0.to ? null : stepRange(f, -1);
+const stepPeriod = dir => { const r = stepRange(F, dir); if (r) setF({ from: r[0], to: r[1] }); };
+$("f-prev").addEventListener("click", () => stepPeriod(-1));
+$("f-next").addEventListener("click", () => stepPeriod(1));
+$("f-link").addEventListener("click", async () => {
+  const b = $("f-link");
+  try { await navigator.clipboard.writeText(location.href); b.textContent = "Copied ✓"; }
+  catch (e) { b.textContent = "Copy failed"; }
+  setTimeout(() => { b.textContent = "Copy link"; }, 1600);
+});
+
+function syncControls() {
+  $("f-preset").value = presetOf(F);
+  $("f-from").value = dayIso(F.from); $("f-to").value = dayIso(F.to);
+  for (const [id, k] of [["f-cat", "cat"], ["f-st", "st"], ["f-kyc", "kyc"], ["f-seg", "seg"], ["f-utr", "utr"], ["f-rs", "rs"]]) $(id).value = String(F[k]);
+  $("f-amin").value = F.amin ?? ""; $("f-amax").value = F.amax ?? "";
+  $("f-disp").checked = !!F.disp;
+  $("f-prev").disabled = !stepRange(F, -1); $("f-next").disabled = !stepRange(F, 1);
+}
+
+const CHIPS = [
+  ["Date", f => f.from !== F0.from || f.to !== F0.to, f => f.from === f.to ? dayFmt(f.from) : `${dayFmt(f.from)} – ${dayFmt(f.to)}`, { from: F0.from, to: F0.to }],
+  ["Category", f => f.cat >= 0, f => D.cat[f.cat], { cat: -1 }],
+  ["Status", f => f.st >= 0, f => title(D.status[f.st]), { st: -1 }],
+  ["KYC", f => f.kyc >= 0, f => title(D.kyc[f.kyc]), { kyc: -1 }],
+  ["Segment", f => f.seg >= 0, f => title(D.seg[f.seg]), { seg: -1 }],
+  ["UTR", f => f.utr >= 0, f => title(D.utr[f.utr]), { utr: -1 }],
+  ["Merchant", f => f.mch >= 0, f => M.id[f.mch] + (M.name[f.mch] ? " · " + M.name[f.mch] : ""), { mch: -1 }],
+  ["Customer", f => f.usr >= 0, f => U.id[f.usr] + (U.name[f.usr] ? " · " + U.name[f.usr] : ""), { usr: -1 }],
+  ["Amount", f => f.amin != null || f.amax != null, f => `${f.amin != null ? inrFull(f.amin) : "₹0"} – ${f.amax != null ? inrFull(f.amax) : "any"}`, { amin: null, amax: null }],
+  ["Only", f => !!f.disp, () => "Disputed payments", { disp: 0 }],
+  ["Weekday", f => f.dow >= 0, f => DOW[f.dow], { dow: -1 }],
+  ["Hour", f => f.hr >= 0, f => `${hh(f.hr)}:00–${hh(f.hr)}:59`, { hr: -1 }],
+  ["Reason", f => f.rs >= 0, f => title(D.reason[f.rs]), { rs: -1 }],
+  ["Severity", f => f.sv >= 0, f => title(D.sev[f.sv]), { sv: -1 }],
+  ["Resolution", f => f.res >= 0, f => title(D.res[f.res]), { res: -1 }],
+  ["Channel", f => f.ch >= 0, f => title(D.ch[f.ch]), { ch: -1 }],
+];
+function renderChips(s, pr) {
+  $("slice-count").innerHTML = (isFiltered(F)
+    ? `<b>${int(s.n)}</b> of ${int(FULL.n)} txns · <b>${int(s.cbs)}</b> of ${int(FULL.cbs)} chargebacks`
+    : `All <b>${int(s.n)}</b> txns · <b>${int(s.cbs)}</b> chargebacks · no filters`) +
+    (pr ? ` · <span title="KPI deltas and the prior-period line compare with this range">vs ${dayFmt(pr[0])} – ${dayFmt(pr[1])}</span>` : "");
+  $("chips").innerHTML = CHIPS.map(([k, on, lbl], i) => on(F)
+    ? `<span class="fchip"><span class="k">${k}</span>${esc(lbl(F))}<button type="button" data-clear="${i}" aria-label="Remove ${k} filter">×</button></span>` : "").join("");
+}
+$("chips").addEventListener("click", e => { const b = e.target.closest("[data-clear]"); if (b) setF(CHIPS[+b.dataset.clear][3]); });
+
+function writeHash() {
+  const p = new URLSearchParams();
+  for (const k in F0) if (F[k] !== F0[k]) p.set(k, k === "from" || k === "to" ? dayIso(F[k]) : String(F[k]));
+  const h = p.toString();
+  try { history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch (e) { /* file:// in some browsers */ }
+}
+function readHash() {
+  const f = { ...F0 };
+  try {
+    for (const [k, v] of new URLSearchParams(location.hash.slice(1))) {
+      if (!(k in F0)) continue;
+      if (k === "from" || k === "to") { const d = isoDay(v); if (!isNaN(d)) f[k] = clampDay(d); }
+      else if (k === "amin" || k === "amax") { const n = parseFloat(v); if (isFinite(n)) f[k] = n; }
+      else { const n = parseInt(v, 10); if (isFinite(n) && n >= -1 && !(k === "mch" && n >= NM) && !(k === "usr" && n >= NU)) f[k] = n; }
+    }
+  } catch (e) { /* ignore malformed hash */ }
+  if (f.from > f.to) [f.from, f.to] = [f.to, f.from];
+  return f;
+}
+
+/* ======================================================================= theme */
+const THEMES = ["system", "light", "dark"];
+let theme = "system";
+try { theme = localStorage.getItem("upi-desk-theme") || "system"; } catch (e) { /* storage blocked */ }
+function applyTheme() {
+  if (theme === "system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", theme);
+  $("theme-btn").textContent = "Theme: " + theme;
+}
+$("theme-btn").addEventListener("click", () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  try { localStorage.setItem("upi-desk-theme", theme); } catch (e) { /* storage blocked */ }
+  applyTheme();
+});
+applyTheme();
+
+/* ======================================================================= shared tooltip */
+const tipEl = $("tip");
+function showTip(anchor, html) {
+  tipEl.innerHTML = html;
+  tipEl.hidden = false;
+  const r = anchor.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = r.left + r.width / 2 - w / 2, y = r.top - h - 8;
+  if (y < 8) y = r.bottom + 8;
+  tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, x)) + "px";
+  tipEl.style.top = y + "px";
+}
+const hideTip = () => { tipEl.hidden = true; };
+
+/* ======================================================================= tables */
+function simpleTable(el, cols, rows, o = {}) {
+  const t = typeof el === "string" ? $(el) : el;
+  t.innerHTML = `<thead><tr>${cols.map(c => `<th class="${c.r ? "r" : ""}">${esc(c.h)}</th>`).join("")}</tr></thead>` +
+    `<tbody>${rows.length ? rows.map((r, k) => `<tr data-k="${k}" class="${o.onRow ? "click" : ""}${o.isSel?.(r) ? " sel" : ""}"${o.onRow ? ' tabindex="0"' : ""}>${cols.map(c => `<td class="${c.r ? "r" : ""}">${c.f(r)}</td>`).join("")}</tr>`).join("")
+      : `<tr><td class="empty" colspan="${cols.length}">Nothing in this slice</td></tr>`}</tbody>`;
+  if (o.onRow) {
+    t.onclick = e => { if (e.target.closest("[data-open]")) return; const tr = e.target.closest("tr[data-k]"); if (tr) o.onRow(rows[+tr.dataset.k]); };
+    t.onkeydown = e => { if (e.key !== "Enter" || e.target.closest("[data-open]")) return; const tr = e.target.closest("tr[data-k]"); if (tr) o.onRow(rows[+tr.dataset.k]); };
+  }
+}
+
+function DataTable(el, o) {
+  const root = $(el);
+  const st = { q: "", sort: o.sort ?? -1, dir: o.dir ?? -1, page: 0 };
+  root.innerHTML = `<div class="dt-bar"><input type="search" placeholder="${esc(o.placeholder || "Search")}" aria-label="Search table"><span class="dt-extra"></span>` +
+    `<span class="dt-count note"></span><button type="button" class="mini dt-csv">Export CSV</button></div>` +
+    `<div class="table-wrap"><table></table></div><div class="dt-pager"></div>`;
+  const input = root.querySelector("input[type=search]"), table = root.querySelector("table"), pager = root.querySelector(".dt-pager"), count = root.querySelector(".dt-count");
+  let view = [], all = [];
+  input.addEventListener("input", () => { st.q = input.value.trim().toLowerCase(); st.page = 0; draw(); });
+  function sorted() {
+    let r = o.rows();
+    if (st.q && o.text) r = r.filter(x => o.text(x).toLowerCase().includes(st.q));
+    const col = o.cols[st.sort];
+    if (col && col.v) {
+      const v = col.v, dir = st.dir;
+      r = r.slice().sort((a, b) => {
+        const x = v(a), y = v(b);
+        if (x == null && y == null) return 0;
+        if (x == null) return 1;
+        if (y == null) return -1;
+        return (x < y ? -1 : x > y ? 1 : 0) * dir || (o.tiebreak ? o.tiebreak(a, b) : 0);
+      });
+    }
+    return r;
+  }
+  function draw() {
+    all = sorted();
+    const ps = o.pageSize || 12, pages = Math.max(1, Math.ceil(all.length / ps));
+    st.page = Math.min(st.page, pages - 1);
+    view = all.slice(st.page * ps, (st.page + 1) * ps);
+    const cols = o.cols;
+    table.innerHTML = `<thead><tr>${cols.map((c, i) => {
+      const s = i === st.sort, aria = s ? (st.dir > 0 ? "ascending" : "descending") : "none";
+      return `<th class="${c.r ? "r" : ""}" aria-sort="${aria}">${c.v ? `<button type="button" class="sort" data-i="${i}">${esc(c.h)}<span class="ar">${s ? (st.dir > 0 ? "▲" : "▼") : ""}</span></button>` : esc(c.h)}</th>`;
+    }).join("")}</tr></thead><tbody>${view.length ? view.map((r, k) =>
+      `<tr data-k="${k}" class="${o.onRow ? "click" : ""}${o.isSel?.(r) ? " sel" : ""}"${o.onRow ? ' tabindex="0"' : ""}>${cols.map(c => `<td class="${c.r ? "r" : ""}">${c.f(r)}</td>`).join("")}</tr>`).join("")
+      : `<tr><td class="empty" colspan="${cols.length}">Nothing matches this slice</td></tr>`}</tbody>`;
+    count.textContent = `${int(all.length)} row${all.length === 1 ? "" : "s"}`;
+    pager.innerHTML = pages > 1 ? `<button type="button" class="mini" data-pg="-1" ${st.page ? "" : "disabled"}>← Prev</button><span>Page ${st.page + 1} of ${int(pages)}</span><button type="button" class="mini" data-pg="1" ${st.page < pages - 1 ? "" : "disabled"}>Next →</button>` : "";
+  }
+  table.addEventListener("click", e => {
+    const b = e.target.closest("button.sort");
+    if (b) { const i = +b.dataset.i; if (i === st.sort) st.dir *= -1; else { st.sort = i; st.dir = o.cols[i].r ? -1 : 1; } st.page = 0; draw(); return; }
+    if (e.target.closest("[data-open]")) return;
+    const tr = e.target.closest("tbody tr[data-k]");
+    if (tr && o.onRow) o.onRow(view[+tr.dataset.k]);
+  });
+  table.addEventListener("keydown", e => {
+    if (e.key !== "Enter" || e.target.closest("button")) return;
+    const tr = e.target.closest("tbody tr[data-k]");
+    if (tr && o.onRow) o.onRow(view[+tr.dataset.k]);
+  });
+  pager.addEventListener("click", e => { const b = e.target.closest("[data-pg]"); if (b) { st.page += +b.dataset.pg; draw(); } });
+  root.querySelector(".dt-csv").addEventListener("click", () => {
+    const cols = (o.csv || o.cols.map(c => [c.h, c.csv || c.v])).filter(([, fn]) => fn);
+    const q = v => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const body = [cols.map(([h]) => q(h)).join(","), ...all.map(r => cols.map(([, fn]) => q(fn(r))).join(","))].join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + body], { type: "text/csv;charset=utf-8" }));
+    a.download = (o.file || el) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+  return { draw, st, extra: root.querySelector(".dt-extra"), setSort(i, dir) { st.sort = i; st.dir = dir; st.page = 0; draw(); } };
+}
+
+const idc = v => v ? `<span class="id">${esc(v)}</span>` : `<span class="dim">—</span>`;
+const mLink = m => `<button type="button" class="id" data-open="m:${m}">${esc(M.id[m])}</button>`;
+const uLink = u => `<button type="button" class="id" data-open="u:${u}">${esc(U.id[u])}</button>`;
+const tLink = i => `<button type="button" class="id" data-open="t:${i}">${txnId(i)}</button>`;
+const cLink = j => `<button type="button" class="id" data-open="c:${j}">${cbId(j)}</button>`;
+const kLink = ci => `<button type="button" class="id" data-open="k:${ci}">${esc(R.clusters[ci].id)}</button>`;
+const tierPill = t => t === "HIGH" ? `<span class="pill crit">High</span>` : t === "MEDIUM" ? `<span class="pill warn">Medium</span>` : `<span class="pill good">Low</span>`;
+const kycPill = s => s === "VERIFIED" ? `<span class="pill good">Verified</span>` : s === "REJECTED" ? `<span class="pill crit">Rejected</span>` : s === "NO_KYC_RECORD" ? `<span class="pill warn">No record</span>` : s ? `<span class="pill warn">${esc(title(s))}</span>` : `<span class="dim">—</span>`;
+const statusPill = s => s === ST_OK ? `<span class="pill good">Success</span>` : s === ST_FAIL ? `<span class="pill crit">Failed</span>` : `<span class="pill warn">Pending</span>`;
+const chips = names => `<div class="chips">${names.map(x => `<span class="chip">${esc(x.replace(/_/g, " "))}</span>`).join("")}</div>`;
+const statline = items => `<div class="statline">${items.map(([l, v]) => `<div><div class="lbl">${esc(l)}</div><div class="v">${v}</div></div>`).join("")}</div>`;
+
+/* ======================================================================= charts */
+const charts = {}, tableViews = {};
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function tokens() {
+  const cs = getComputedStyle(document.documentElement), css = n => cs.getPropertyValue(n).trim();
+  const k = {
+    ink: css("--ink"), ink2: css("--ink-2"), ink3: css("--ink-3"), grid: css("--grid"), line: css("--line"), surface: css("--surface"),
+    s1: css("--s1"), s2: css("--s2"), crit: css("--crit"), warn: css("--warn"), good: css("--good"), muted: css("--muted-mark"),
+    seq: [css("--seq-4"), css("--seq-3"), css("--seq-2"), css("--seq-1")],
+  };
+  Chart.defaults.font.family = css("--f-body");
+  Chart.defaults.font.size = 11.5;
+  Chart.defaults.color = k.ink3;
+  // mutate, never replace: swapping the whole object drops Chart.js's animation descriptors ("this._fn is not a function")
+  if (reduceMotion) Chart.defaults.animation.duration = 0; else Chart.defaults.animation.duration = 250;
+  k.tip = { backgroundColor: k.ink, titleColor: k.surface, bodyColor: k.surface, padding: 10, cornerRadius: 6, displayColors: true, boxPadding: 4, titleFont: { weight: "600" } };
+  k.axis = (extra = {}) => ({ grid: { color: k.grid, drawTicks: false }, border: { display: false }, ticks: { padding: 6, color: k.ink3, maxTicksLimit: 5 }, ...extra });
+  k.noGrid = (extra = {}) => ({ grid: { display: false }, border: { color: k.line }, ticks: { padding: 6, color: k.ink3 }, ...extra });
+  k.base = (extra = {}, tooltip = {}) => ({ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...k.tip, ...tooltip } }, ...extra });
+  return k;
+}
+const fade = (active, selected, color) => active && !selected ? hex2rgba(color, .28) : color;
+
+function upsert(id, cfg, extra = {}) {
+  let c = charts[id];
+  if (c && c.config.type === cfg.type) { c.data = cfg.data; c.options = cfg.options; c.update(); }
+  else { if (c) c.destroy(); c = charts[id] = new Chart($(id), cfg); wireChart(c); }
+  c.$onClick = extra.onClick || null;
+  c.$brush = extra.brush || null;
+  c.$fmt = extra.fmt || null;
+  c.$table = extra.table || null;
+  refreshTableView(id);
+}
+
+function wireChart(c) {
+  const cv = c.canvas, box = cv.parentNode;
+  const brush = document.createElement("div");
+  brush.className = "brush"; brush.hidden = true; box.appendChild(brush);
+  let start = null;
+  const hitAt = e => c.getElementsAtEventForMode(e, "nearest", { intersect: true }, false)[0];
+  const idxAt = e => {
+    const r = cv.getBoundingClientRect(), n = c.data.labels.length;
+    return Math.max(0, Math.min(n - 1, Math.round(c.scales.x.getValueForPixel(e.clientX - r.left))));
+  };
+  const paint = (a, b) => {
+    const sc = c.scales.x, n = c.data.labels.length, lo = Math.min(a, b), hi = Math.max(a, b);
+    const half = (sc.right - sc.left) / Math.max(n, 1) / 2;
+    const x1 = Math.max(sc.left, sc.getPixelForValue(lo) - half), x2 = Math.min(sc.right, sc.getPixelForValue(hi) + half);
+    Object.assign(brush.style, { left: x1 + "px", width: Math.max(2, x2 - x1) + "px", top: c.chartArea.top + "px", height: (c.chartArea.bottom - c.chartArea.top) + "px" });
+    brush.hidden = false;
+  };
+  cv.addEventListener("pointerdown", e => {
+    if (!c.$brush || e.button !== 0) return;
+    start = idxAt(e);
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
+    paint(start, start);
+  });
+  cv.addEventListener("pointermove", e => {
+    if (start != null) { paint(start, idxAt(e)); return; }
+    if (c.$onClick) cv.style.cursor = hitAt(e) ? "pointer" : "default";
+  });
+  cv.addEventListener("pointerup", e => {
+    if (start == null) return;
+    const end = idxAt(e), days = c.$brush, a = Math.min(start, end), b = Math.max(start, end);
+    start = null; brush.hidden = true;
+    if (a === b && F.from === F.to) setF({ from: F0.from, to: F0.to });
+    else setF({ from: days[a], to: days[b] });
+  });
+  cv.addEventListener("pointercancel", () => { start = null; brush.hidden = true; });
+  cv.addEventListener("click", e => { if (!c.$onClick) return; const el = hitAt(e); if (el) c.$onClick(el.index, el.datasetIndex); });
+}
+
+function addTableToggle(id) {
+  const cv = $(id), box = cv.parentNode, head = box.closest(".panel").querySelector(".panel-head .tools") || box.closest(".panel").querySelector(".panel-head");
+  const btn = document.createElement("button");
+  btn.type = "button"; btn.className = "mini"; btn.textContent = "Table"; btn.setAttribute("aria-pressed", "false");
+  btn.setAttribute("aria-label", "Show " + (cv.getAttribute("aria-label") || "chart") + " as a table");
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap"; wrap.hidden = true;
+  wrap.style.maxHeight = "340px"; wrap.style.overflowY = "auto";
+  box.after(wrap);
+  btn.addEventListener("click", () => {
+    const show = wrap.hidden;
+    wrap.hidden = !show; box.hidden = show;
+    btn.setAttribute("aria-pressed", String(show)); btn.textContent = show ? "Chart" : "Table";
+    refreshTableView(id);
+  });
+  head.appendChild(btn);
+  tableViews[id] = wrap;
+}
+function refreshTableView(id) {
+  const w = tableViews[id], c = charts[id];
+  if (!w || w.hidden || !c) return;
+  if (c.$table) { const [head, rows] = c.$table(); w.innerHTML = `<table><thead><tr>${head.map((h, i) => `<th class="${i ? "r" : ""}">${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((v, i) => `<td class="${i ? "r" : ""}">${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`; return; }
+  const fmt = c.$fmt || (v => v == null ? "—" : Number.isInteger(v) ? int(v) : v.toFixed(2));
+  const ds = c.data.datasets;
+  w.innerHTML = `<table><thead><tr><th></th>${ds.map(d => `<th class="r">${esc(d.label)}</th>`).join("")}</tr></thead><tbody>` +
+    c.data.labels.map((l, i) => `<tr><td>${esc(l)}</td>${ds.map((d, k) => `<td class="r">${esc(fmt(d.data[i], k))}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+}
+["c-daily-count", "c-daily-value", "c-daily-status", "c-fail-day", "c-fail-hour", "c-cat-amount", "c-cat-ratio", "c-reasons", "c-severity", "c-resolution", "c-channel", "c-delay", "c-kyc", "c-m-scatter"].forEach(addTableToggle);
+
+/* ======================================================================= static quarter-level content */
+{
+  document.getElementById("mast-meta").innerHTML =
+    `Window <b>${dayFmt(0)} – ${dayFmt(DAYS - 1)} ${SY}</b><br><b>${int(K.txn_count)}</b> txns · <b>${int(K.chargeback_count)}</b> disputes<br>` +
+    `<b>${int(K.users)}</b> KYC users · <b>${int(K.merchants)}</b> merchants`;
+  const cats = DATA.categories.filter(c => c.merchant_category !== "Unknown");
+  const bigCats = cats.filter(c => c.txns >= 1000);
+  const worstBig = [...bigCats].sort((a, b) => b.chargeback_to_txn_ratio - a.chargeback_to_txn_ratio)[0];
+  const worstAny = [...cats].sort((a, b) => b.chargeback_to_txn_ratio - a.chargeback_to_txn_ratio)[0];
+  const topAmtCat = [...DATA.categories].sort((a, b) => b.disputed_amount - a.disputed_amount)[0];
+  const noKyc = byKey(DATA.kyc_txn, "kyc_status").NO_KYC_RECORD;
+  const utr = byKey(DATA.utr, "utr_status");
+  const topCl = DATA.clusters[0];
+  const findings = [
+    ["crit", "Critical", `${pct(noKyc.amount / K.txn_amount, 0)} of payment value comes from users with no KYC record`,
+      `${inr(noKyc.amount)} across ${int(noKyc.txns)} transactions cannot be tied to a verified identity, and those users raised ${int(noKyc.chargebacks)} chargebacks. Close the onboarding gap before tuning any fraud model.`],
+    ["crit", "Critical", `One in eight transactions is disputed — ${pct(K.chargeback_to_txn_ratio)} chargeback ratio`,
+      `${int(K.disputed_txns)} transactions carry a linked chargeback worth ${inr(K.chargeback_linked_amount)}. ${pct(K.fraud_reason_share, 0)} are fraud-type (takeover, unauthorised, suspected fraud) and ${pct(K.open_dispute_share, 0)} are still open.`],
+    ["warn", "Watch", `${worstBig.merchant_category} has the worst dispute ratio of the large categories`,
+      `${pct(worstBig.chargeback_to_txn_ratio)} of its ${int(worstBig.txns)} transactions are charged back, against ${pct(K.chargeback_to_txn_ratio)} overall. ${worstAny.merchant_category} runs higher (${pct(worstAny.chargeback_to_txn_ratio)}) on only ${int(worstAny.txns)} transactions. ${topAmtCat.merchant_category} carries the most money in dispute: ${inr(topAmtCat.disputed_amount)}.`],
+    ["warn", "Watch", `${int(C.high_risk_merchants)} merchants score high risk; many are not in the merchant master`,
+      `${int(C.repeat_dispute_merchants)} merchants have two or more disputes. The top of the list is dominated by payees that never passed onboarding or have no settlement account on file.`],
+    ["warn", "Watch", `${int(C.suspicious_clusters)} connected dispute rings in the user–merchant graph`,
+      topCl ? `The largest links ${topCl.users} disputing users to ${topCl.merchants} merchants through ${topCl.txns} payments, with ${topCl.chargebacks} chargebacks (${topCl.fraud_chargebacks} fraud-type) worth ${inr(topCl.disputed_amount)}.` : ""],
+    ["info", "Info", `Chargeback IDs never match the transaction they dispute`,
+      `All ${int(K.chargeback_linked)} linked complaints carry a different user and merchant ID than the payment itself. Disputes are attributed through txn_id; ratios computed on the complaint's own IDs would be wrong.`],
+    ["info", "Info", `A missing UTR is not a failure or dispute signal here`,
+      `${int(utr.MISSING.txns)} transactions lack a UTR. Their failed rate (${pct(utr.MISSING.failed_rate)}) and dispute rate (${pct(utr.MISSING.dispute_rate)}) sit within half a point of transactions with a valid UTR.`],
+    ["good", "Cleaned", `Duplicate rows would have overstated volume by ${inr(K.duplicate_amount_removed)}`,
+      `${int(K.duplicate_txns_removed)} duplicate transactions and 84 duplicate complaints were removed before any ratio was calculated; all other messy rows were repaired and kept.`],
+  ];
+  $("finding-list").innerHTML = findings.map(([cls, lbl, h, p]) => `<div class="finding"><span class="pill ${cls}">${lbl}</span><h3>${h}</h3><p>${p}</p></div>`).join("");
+
+  $("method").innerHTML = [
+    `<p><b>Filters</b> scope every KPI, chart and table on the page except blocks tagged <span class="static">Whole quarter</span>. Charts that own a filter (category, reason, hour…) keep showing the alternatives and highlight the selection.</p>`,
+    `<p><b>Chargeback-to-transaction ratio</b> = transactions with ≥1 chargeback linked by <span class="mono">txn_id</span> ÷ all de-duplicated transactions. The ${int(C.chargebacks_unlinked)} complaints with a missing or unknown txn_id count toward totals only while no transaction filter is set, and never toward ratios.</p>`,
+    `<p><b>Deltas</b> on the KPIs compare the selected dates with the period just before (the previous calendar month when a month is picked), with every other filter held the same. Red means the risk moved the wrong way.</p>`,
+    `<p><b>Dispute filters</b> (reason, severity, resolution, channel) narrow the chargebacks; a transaction then counts as disputed only if it has a matching chargeback.</p>`,
+    `<p><b>Attribution</b>: user, merchant and category come from the linked transaction, never the complaint's own IDs.</p>`,
+    `<p><b>Risk scores</b> are computed once on the whole quarter so an entity's tier does not change as you filter.</p>`,
+    `<p><b>Dates</b>: <span class="mono">DD/MM/YYYY</span> and <span class="mono">MM-DD-YYYY</span> were separated by evidence. <b>Reporting delay</b> uses the complaint's own transaction date; ${int(C.reported_before_txn)} impossible cases are nulled.</p>`,
+    `<p><b>ID collisions</b>: 6,288 KYC IDs map to several different people. The customer table keeps the most recent, most complete record and flags the rest.</p>`,
+  ].join("");
+
+  simpleTable("t-spikes", [
+    { h: "Merchant", f: r => `${mIndex.has(r.merchant_id) ? mLink(mIndex.get(r.merchant_id)) : idc(r.merchant_id)} <span class="dim">${r.merchant_name ? esc(r.merchant_name) : "not in master"}</span>` },
+    { h: "Spike day", f: r => esc(dayFmt(isoDay(r.txn_date))) }, { h: "Txns that day", r: 1, f: r => int(r.day_txns) },
+    { h: "Quarter total", r: 1, f: r => int(r.total_txns) }, { h: "Value that day", r: 1, f: r => inrFull(r.day_amount) },
+    { h: "Disputes ≤14 d", r: 1, f: r => int(r.disputes_within_14d) },
+  ], DATA.spikes);
+
+  const qTable = DataTable("t-quality", {
+    pageSize: 12, placeholder: "Search checks", file: "data_quality_report",
+    text: r => `${r.table} ${r.check} ${r.action}`,
+    rows: () => QUALITY.filter(q => qSource === "all" || q.table === qSource),
+    cols: [
+      { h: "Source", v: r => r.table, f: r => `<span class="chip">${esc(r.table)}</span>` },
+      { h: "Check", v: r => r.check, f: r => esc(r.check) },
+      { h: "Rows", r: 1, v: r => r.rows_affected, f: r => r.rows_affected ? int(r.rows_affected) : `<span class="dim">0</span>` },
+      { h: "Action", v: r => r.action, f: r => `<span class="dim">${esc(r.action)}</span>` },
+    ],
+  });
+  let qSource = "all";
+  const sources = [...new Set(QUALITY.map(q => q.table))];
+  qTable.extra.innerHTML = `<select aria-label="Source">${opt("all", "All sources")}${sources.map(s => opt(s, title(s))).join("")}</select>`;
+  qTable.extra.querySelector("select").addEventListener("change", e => { qSource = e.target.value; qTable.st.page = 0; qTable.draw(); });
+  qTable.draw();
+}
+
+/* ======================================================================= section renderers */
+function renderKpis(s, isF, ent, prior, pr) {
+  const q = (full, fmt) => isF && !prior ? ` · quarter ${fmt(full)}` : "";
+  // change vs the prior period: relative % for amounts and counts, points for rates, days for delay
+  const dl = (cur, prev, kind, badUp) => {
+    if (!prior || cur == null || prev == null) return "";
+    let d, txt;
+    if (kind === "pts") { d = (cur - prev) * 100; txt = Math.abs(d).toFixed(1) + " pts"; }
+    else if (kind === "d") { d = cur - prev; txt = Math.abs(d).toFixed(1) + " d"; }
+    else { if (!prev) return ""; d = (cur - prev) / prev * 100; txt = Math.abs(d).toFixed(0) + "%"; }
+    const flat = Math.abs(d) < (kind === "rel" ? .5 : .05);
+    const cls = flat || badUp == null ? "flat" : (d > 0) === badUp ? "bad" : "good";
+    return `<span class="delta ${cls}" title="vs ${dayFmt(pr[0])} – ${dayFmt(pr[1])}${kind === "rel" ? ", per day" : ""}">${flat ? "≈ same" : (d > 0 ? "▲ " : "▼ ") + txt}</span>`;
+  };
+  // totals compare per day, so February is not "down" against January just for being shorter
+  const perDay = (v, r) => v == null ? null : v / (r[1] - r[0] + 1);
+  const cur = [F.from, F.to];
+  const hm = ent.mRows.filter(r => r.tier === TIER_HIGH).length, hu = ent.uRows.filter(r => r.tier === TIER_HIGH).length;
+  const kpis = [
+    ["Transaction value", inr(s.amt), `<b>${int(s.n)}</b> transactions${isF ? ` of ${int(FULL.n)}` : ` after removing ${int(K.duplicate_txns_removed)} duplicates`}`, prior ? dl(perDay(s.amt, cur), perDay(prior.amt, pr), "rel", false) : "", "volume"],
+    ["Average transaction", inr(s.avg), `Successful value <b>${inr(s.succAmt)}</b>${q(FULL.avg, inr)}`, dl(s.avg, prior?.avg, "rel", null), "categories"],
+    ["Failed rate", pct(s.failRate), `Pending <b>${pct(s.pendRate)}</b>${q(FULL.failRate, pct)}`, dl(s.failRate, prior?.failRate, "pts", true), "failures"],
+    ["Chargebacks", int(s.cbs), `<b>${inr(s.cbAmt)}</b> disputed${isF && !prior ? ` · quarter ${int(FULL.cbs)}` : isF ? "" : ` · ${int(K.chargeback_linked)} linked`}`, prior ? dl(perDay(s.cbs, cur), perDay(prior.cbs, pr), "rel", true) : "", "disputes"],
+    ["Chargeback-to-txn ratio", pct(s.ratio), `<b>${pct(s.amtRatio)}</b> of value disputed${q(FULL.ratio, pct)}`, dl(s.ratio, prior?.ratio, "pts", true), "categories"],
+    ["Fraud-type share", pct(s.fraudShare, 0), `<b>${pct(s.openShare, 0)}</b> still open${q(FULL.fraudShare, v => pct(v, 0))}`, dl(s.fraudShare, prior?.fraudShare, "pts", true), "disputes"],
+    ["Avg reporting delay", s.delayMean == null ? "—" : s.delayMean.toFixed(1) + " days", `Median <b>${s.delayMedian == null ? "—" : s.delayMedian.toFixed(1) + " d"}</b> · ${int(s.late)} after 7 days`, dl(s.delayMean, prior?.delayMean, "d", true), "disputes"],
+    ["High-risk in slice", `${int(hm)} / ${int(hu)}`, `merchants / users · <b>${int(ent.clRows.length)}</b> clusters active`, "", "merchants"],
+  ];
+  $("kpis").innerHTML = kpis.map(([l, v, sub, delta, to]) => `<a class="kpi" href="#${to}" title="Jump to the ${to} section"><span class="lbl">${l}</span><span class="val">${v}${delta}</span><span class="sub">${sub}</span></a>`).join("");
+}
+
+function dailyRows(sl, from = F.from, to = F.to) {
+  const rows = Array.from({ length: to - from + 1 }, (_, x) => ({ d: from + x, txns: 0, amt: 0, an: 0, ok: 0, fail: 0, pend: 0, disp: 0 }));
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    const r = rows[T.d[i] - from];
+    if (!r) continue;
+    r.txns++;
+    if (T.a[i] != null) { r.amt += T.a[i]; r.an++; }
+    if (T.s[i] === ST_OK) r.ok++; else if (T.s[i] === ST_FAIL) r.fail++; else r.pend++;
+    if (sl.hit[i]) r.disp++;
+  }
+  return rows;
+}
+
+function renderVolume(rows, s, k, prev) {
+  const labels = rows.map(r => dayFmt(r.d)), days = rows.map(r => r.d), few = rows.length <= 3;
+  const xDays = k.noGrid({ ticks: { color: k.ink3, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, padding: 6 } });
+  const hover = { mode: "index", intersect: false };
+  const counts = rows.map(r => r.txns);
+  const roll = (arr, w) => arr.map((_, i) => i < w - 1 ? null : arr.slice(i - w + 1, i + 1).reduce((a, b) => a + b, 0) / w);
+  upsert("c-daily-count", {
+    type: "line", data: { labels, datasets: [
+      { label: "Transactions", data: counts, borderColor: k.s1, backgroundColor: hex2rgba(k.s1, .10), fill: true, borderWidth: 2, pointRadius: few ? 4 : 0, pointHoverRadius: 4, tension: .25 },
+      { label: "7-day average", data: roll(counts, 7), borderColor: k.ink3, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 0, fill: false, tension: .25 },
+      ...(prev ? [{ label: "Prior period", data: rows.map((_, x) => prev[x] ? prev[x].txns : null), borderColor: hex2rgba(k.s2, .8), borderDash: [2, 3], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, fill: false, tension: .25 }] : [])] },
+    options: k.base({ interaction: hover, scales: { x: xDays, y: k.axis({ beginAtZero: true }) } },
+      { callbacks: { label: c => ` ${c.dataset.label}${c.datasetIndex === 2 && prev[c.dataIndex] ? ` (${dayFmt(prev[c.dataIndex].d)})` : ""}: ${c.raw == null ? "—" : int(c.raw)}` } }),
+  }, { brush: days, fmt: v => v == null ? "—" : int(v) });
+
+  upsert("c-daily-value", {
+    type: "bar", data: { labels, datasets: [
+      { label: "Value (₹ lakh)", data: rows.map(r => r.amt / 1e5), backgroundColor: hex2rgba(k.s1, .75), hoverBackgroundColor: k.s1, borderRadius: { topLeft: 2, topRight: 2 }, borderSkipped: "bottom", barPercentage: .9, categoryPercentage: .92 }] },
+    options: k.base({ interaction: hover, scales: { x: xDays, y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => "₹" + v + "L" } }) } },
+      { callbacks: { label: c => ` Value: ${inr(rows[c.dataIndex].amt)}`, afterLabel: c => ` ${int(rows[c.dataIndex].txns)} txns · avg ${inrFull(rows[c.dataIndex].an ? rows[c.dataIndex].amt / rows[c.dataIndex].an : null)}` } }),
+  }, { brush: days, fmt: v => v.toFixed(2) });
+
+  const stack = (label, key, color) => ({ label, data: rows.map(r => r[key]), backgroundColor: color, borderColor: k.surface, borderWidth: { top: 1 }, barPercentage: .92, categoryPercentage: .95, stack: "s" });
+  upsert("c-daily-status", {
+    type: "bar", data: { labels, datasets: [stack("Failed", "fail", k.crit), stack("Pending", "pend", k.warn), stack("Success", "ok", k.muted)] },
+    options: k.base({ interaction: hover, scales: { x: { ...xDays, stacked: true }, y: k.axis({ stacked: true }) } },
+      { callbacks: { label: c => ` ${c.dataset.label}: ${int(c.raw)} (${pct(rows[c.dataIndex].txns ? c.raw / rows[c.dataIndex].txns : 0)})` } }),
+  }, { brush: days, fmt: v => int(v) });
+
+  const nd = rows.length;
+  $("leg-prior").hidden = !prev;
+  $("vol-lede").innerHTML = s.n
+    ? `<b>${int(s.n)} payments</b> over ${nd} day${nd === 1 ? "" : "s"} — about <b>${int(s.n / nd)} a day</b> (${int(Math.min(...counts))}–${int(Math.max(...counts))}) worth roughly <b>${inr(s.amt / nd)}</b> daily. Drag across any daily chart to zoom into a date range.`
+    : `No payments match these filters.`;
+}
+
+function renderFailures(rows, timeSl, s, k) {
+  const labels = rows.map(r => dayFmt(r.d)), days = rows.map(r => r.d);
+  const fr = rows.map(r => r.txns ? r.fail / r.txns * 100 : null);
+  upsert("c-fail-day", {
+    type: "line", data: { labels, datasets: [
+      { label: "Failed rate %", data: fr, borderColor: k.crit, borderWidth: 2, pointRadius: rows.length <= 3 ? 4 : 0, pointHoverRadius: 4, tension: .2, spanGaps: true },
+      { label: "Slice average %", data: fr.map(() => s.failRate * 100), borderColor: k.ink3, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 0 }] },
+    options: k.base({ interaction: { mode: "index", intersect: false }, scales: { x: k.noGrid({ ticks: { color: k.ink3, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, padding: 6 } }), y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => v + "%" } }) } },
+      { callbacks: { label: c => c.raw == null ? "" : c.datasetIndex ? ` Average: ${c.raw.toFixed(1)}%` : ` Failed: ${c.raw.toFixed(1)}% (${rows[c.dataIndex].fail} of ${rows[c.dataIndex].txns})` } }),
+  }, { brush: days, fmt: v => v == null ? "—" : v.toFixed(1) + "%" });
+
+  const hours = Array.from({ length: 24 }, (_, h) => ({ h, txns: 0, fail: 0 }));
+  const heat = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ txns: 0, fail: 0, disp: 0 })));
+  for (let i = 0; i < NT; i++) {
+    if (!timeSl.tm[i] || T.mi[i] < 0) continue;
+    const h = hourOf(i), cell = heat[dowOf(T.d[i])][h];
+    cell.txns++; hours[h].txns++;
+    if (T.s[i] === ST_FAIL) { cell.fail++; hours[h].fail++; }
+    if (timeSl.hit[i]) cell.disp++;
+  }
+  // the hour chart shows the weekday selection but not the hour selection, so bars stay comparable
+  const hrate = hours.map(x => x.txns ? x.fail / x.txns * 100 : 0);
+  const hmax = Math.max(...hrate);
+  upsert("c-fail-hour", {
+    type: "bar", data: { labels: hours.map(x => hh(x.h)), datasets: [
+      { label: "Failed rate %", data: hrate, backgroundColor: hours.map((x, i) => fade(F.hr >= 0, F.hr === i, hrate[i] === hmax && hmax > 0 ? k.crit : hex2rgba(k.crit, .5))), borderRadius: { topLeft: 3, topRight: 3 }, borderSkipped: "bottom", barPercentage: .82 }] },
+    options: k.base({ scales: { x: k.noGrid({ ticks: { color: k.ink3, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } }), y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => v + "%" } }) } },
+      { callbacks: { title: c => `${c[0].label}:00 – ${c[0].label}:59`, label: c => ` Failed: ${c.raw.toFixed(1)}% of ${int(hours[c.dataIndex].txns)}` } }),
+  }, { onClick: i => toggle("hr", i), fmt: v => v.toFixed(1) + "%" });
+
+  renderHeat(heat);
+
+  const worst = rows.filter(r => r.txns >= 20).sort((a, b) => b.fail / b.txns - a.fail / a.txns)[0];
+  const active = hrate.filter((_, i) => hours[i].txns >= 30);
+  $("fail-lede").innerHTML = s.n
+    ? `Failed rate is <b>${pct(s.failRate)}</b> in this slice${isFiltered(F) ? ` (quarter ${pct(FULL.failRate)})` : ""}.` +
+      (active.length ? ` By hour it ranges from ${Math.min(...active).toFixed(1)}% to ${Math.max(...active).toFixed(1)}%, so this is not an overnight batch or peak-load problem.` : "") +
+      (worst ? ` Worst day: <b>${dayFmt(worst.d)}</b> at ${pct(worst.fail / worst.txns)}.` : "")
+    : `No payments match these filters.`;
+}
+
+let heatMetric = "txns", heatData = null;
+function renderHeat(heat) {
+  heatData = heat;
+  const val = c => heatMetric === "txns" ? c.txns : c.txns ? (heatMetric === "failed" ? c.fail : c.disp) / c.txns : null;
+  const vals = heat.flat().map(val).filter(v => v != null);
+  const lo = heatMetric === "txns" ? 0 : Math.min(...vals, 0), hi = Math.max(...vals, 0);
+  const fmtV = v => v == null ? "—" : heatMetric === "txns" ? int(v) : pct(v);
+  const sel = F.hr >= 0 || F.dow >= 0;
+  let html = `<span></span>` + Array.from({ length: 24 }, (_, h) => `<button type="button" class="hl" data-h="${h}" aria-label="Filter hour ${hh(h)}">${h % 3 === 0 ? hh(h) : ""}</button>`).join("");
+  for (const w of DOW_ROWS) {
+    html += `<button type="button" class="dl" data-w="${w}" aria-label="Filter ${DOW[w]}">${DOW[w]}</button>`;
+    for (let h = 0; h < 24; h++) {
+      const c = heat[w][h], v = val(c);
+      const p = v == null || hi === lo ? 0 : (v - lo) / (hi - lo);
+      const inSel = (F.dow < 0 || F.dow === w) && (F.hr < 0 || F.hr === h);
+      const bg = v == null ? "var(--surface-2)" : `color-mix(in srgb, var(--s1) ${Math.round(8 + 92 * p)}%, var(--surface-2))`;
+      html += `<button type="button" class="cell${sel ? (inSel ? " on" : " off") : ""}" data-w="${w}" data-h="${h}" style="background:${bg}" aria-label="${DOW[w]} ${hh(h)}:00, ${fmtV(v)}"></button>`;
+    }
+  }
+  $("heat").innerHTML = html;
+  $("heat-scale").innerHTML = `<span>${fmtV(lo)}</span><i></i><span>${fmtV(hi)}</span>`;
+}
+{
+  const heatEl = $("heat");
+  heatEl.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.classList.contains("cell")) { const w = +b.dataset.w, h = +b.dataset.h; setF(F.dow === w && F.hr === h ? { dow: -1, hr: -1 } : { dow: w, hr: h }); }
+    else if (b.classList.contains("hl")) toggle("hr", +b.dataset.h);
+    else if (b.classList.contains("dl")) toggle("dow", +b.dataset.w);
+  });
+  const tipFor = b => {
+    if (!b || !b.classList.contains("cell") || !heatData) return hideTip();
+    const w = +b.dataset.w, h = +b.dataset.h, c = heatData[w][h];
+    showTip(b, `<b>${int(c.txns)}</b> payments<br>${DOW[w]} ${hh(h)}:00–${hh(h)}:59<br>Failed ${pct(c.txns ? c.fail / c.txns : null)} · disputed ${pct(c.txns ? c.disp / c.txns : null)}`);
+  };
+  heatEl.addEventListener("pointerover", e => tipFor(e.target.closest(".cell")));
+  heatEl.addEventListener("pointerleave", hideTip);
+  heatEl.addEventListener("focusin", e => tipFor(e.target.closest(".cell")));
+  heatEl.addEventListener("focusout", hideTip);
+  $("heat-metric").addEventListener("click", e => {
+    const b = e.target.closest("button[data-k]");
+    if (!b) return;
+    heatMetric = b.dataset.k;
+    $("heat-metric").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    renderHeat(heatData);
+  });
+}
+
+function renderUtr(sl) {
+  const rows = D.utr.map((name, x) => ({ x, name, txns: 0, amt: 0, fail: 0, pend: 0, disp: 0 }));
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    const r = rows[T.x[i]];
+    r.txns++; r.amt += T.a[i] || 0;
+    if (T.s[i] === ST_FAIL) r.fail++; else if (T.s[i] === ST_PEND) r.pend++;
+    if (sl.hit[i]) r.disp++;
+  }
+  const rate = (a, b) => b ? a / b : null;
+  simpleTable("t-utr", [
+    { h: "UTR", f: r => r.name === "VALID" ? `<span class="pill good">Valid</span>` : `<span class="pill warn">${esc(title(r.name))}</span>` },
+    { h: "Transactions", r: 1, f: r => int(r.txns) }, { h: "Value", r: 1, f: r => inr(r.amt) },
+    { h: "Failed rate", r: 1, f: r => pct(rate(r.fail, r.txns)) }, { h: "Pending rate", r: 1, f: r => pct(rate(r.pend, r.txns)) },
+    { h: "Dispute rate", r: 1, f: r => pct(rate(r.disp, r.txns)) },
+  ], rows.filter(r => r.txns), { onRow: r => toggle("utr", r.x), isSel: r => F.utr === r.x });
+}
+
+let catRows = [];
+const catTable = DataTable("t-cat", {
+  pageSize: 15, sort: 2, dir: -1, placeholder: "Search categories", file: "category_performance",
+  text: r => r.name, rows: () => catRows, onRow: r => toggle("cat", r.i), isSel: r => F.cat === r.i,
+  cols: [
+    { h: "Category", v: r => r.name, f: r => `<b>${esc(r.name)}</b>` },
+    { h: "Txns", r: 1, v: r => r.txns, f: r => int(r.txns) },
+    { h: "Value", r: 1, v: r => r.amt, f: r => inr(r.amt) },
+    { h: "Avg ticket", r: 1, v: r => r.avg, f: r => inrFull(r.avg) },
+    { h: "Failed", r: 1, v: r => r.failRate, f: r => pct(r.failRate) },
+    { h: "Merchants", r: 1, v: r => r.merchants, f: r => int(r.merchants) },
+    { h: "Chargebacks", r: 1, v: r => r.cbs, f: r => int(r.cbs) },
+    { h: "Disputed", r: 1, v: r => r.camt, f: r => inr(r.camt) },
+    { h: "Fraud-type", r: 1, v: r => r.cbs ? r.fraud / r.cbs : null, f: r => r.cbs ? pct(r.fraud / r.cbs, 0) : "—" },
+    { h: "CB / txn", r: 1, v: r => r.ratio, f: r => `<div class="bar-cell"><span class="num">${pct(r.ratio)}</span><span class="b" style="width:${Math.round(56 * r.ratio / (catRows.maxRatio || 1))}px;background:${r.ratio > catRows.overall ? "var(--s2)" : "var(--muted-mark)"}"></span></div>` },
+  ],
+});
+
+function renderCategories(sl, k) {
+  const cs = D.cat.map((name, i) => ({ i, name, txns: 0, amt: 0, an: 0, fail: 0, disp: 0, cbs: 0, camt: 0, fraud: 0, mset: new Set() }));
+  let txns = 0, disp = 0;
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    const r = cs[T.c[i]];
+    r.txns++; txns++;
+    if (T.a[i] != null) { r.amt += T.a[i]; r.an++; }
+    if (T.s[i] === ST_FAIL) r.fail++;
+    if (sl.hit[i]) { r.disp++; disp++; }
+    r.mset.add(T.m[i]);
+  }
+  for (let j = 0; j < NC; j++) {
+    if (!sl.cm[j]) continue;
+    const c = cbCat(j);
+    if (c < 0) continue;
+    const r = cs[c];
+    r.cbs++; r.camt += CB.a[j] || 0; r.fraud += CB.fr[j];
+  }
+  catRows = cs.filter(r => r.txns || r.cbs).map(r => ({ ...r, avg: r.an ? r.amt / r.an : null, failRate: r.txns ? r.fail / r.txns : null, ratio: r.txns ? r.disp / r.txns : 0, merchants: r.mset.size }));
+  catRows.overall = txns ? disp / txns : 0;
+  catRows.maxRatio = Math.max(0, ...catRows.map(r => r.ratio));
+  catTable.draw();
+
+  const on = F.cat >= 0;
+  const byAmt = [...catRows].sort((a, b) => b.amt - a.amt);
+  upsert("c-cat-amount", {
+    type: "bar", data: { labels: byAmt.map(c => c.name), datasets: [
+      { label: "Amount (₹ Cr)", data: byAmt.map(c => c.amt / 1e7), backgroundColor: byAmt.map(c => fade(on, c.i === F.cat, c.name === "Unknown" ? k.muted : k.s1)), borderRadius: { topRight: 3, bottomRight: 3 }, borderSkipped: "left", barPercentage: .78 }] },
+    options: k.base({ indexAxis: "y", scales: { x: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => "₹" + v + " Cr" } }), y: k.noGrid({ ticks: { color: k.ink2, padding: 6 } }) } },
+      { callbacks: { label: c => ` ${inr(byAmt[c.dataIndex].amt)} · ${int(byAmt[c.dataIndex].txns)} txns` } }),
+  }, { onClick: i => toggle("cat", byAmt[i].i), fmt: v => v.toFixed(3) });
+
+  const byRatio = [...catRows].filter(c => c.txns).sort((a, b) => b.ratio - a.ratio);
+  upsert("c-cat-ratio", {
+    type: "bar", data: { labels: byRatio.map(c => `${c.name}  (n=${nf.format(c.txns)})`), datasets: [
+      { label: "CB / txn %", data: byRatio.map(c => c.ratio * 100), backgroundColor: byRatio.map(c => fade(on, c.i === F.cat, c.ratio > catRows.overall ? k.s2 : k.muted)), borderRadius: { topRight: 3, bottomRight: 3 }, borderSkipped: "left", barPercentage: .78 }] },
+    options: k.base({ indexAxis: "y", scales: { x: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => v + "%" } }), y: k.noGrid({ ticks: { color: k.ink2, padding: 6 } }) } },
+      { callbacks: { label: c => ` ${pct(byRatio[c.dataIndex].ratio)} · ${int(byRatio[c.dataIndex].cbs)} chargebacks · ${inr(byRatio[c.dataIndex].camt)}` } }),
+  }, { onClick: i => toggle("cat", byRatio[i].i), fmt: v => v.toFixed(1) + "%" });
+
+  const big = byRatio.filter(c => c.name !== "Unknown" && c.txns >= 200);
+  const topAmt = [...catRows].sort((a, b) => b.camt - a.camt)[0];
+  $("cat-lede").innerHTML = catRows.length
+    ? `${big.length ? `Among categories with ≥200 payments, <b>${esc(big[0].name)}</b> has the highest dispute ratio (${pct(big[0].ratio)} vs ${pct(catRows.overall)} across categories). ` : ""}` +
+      `${topAmt && topAmt.camt ? `<b>${esc(topAmt.name)}</b> carries the most money in dispute (${inr(topAmt.camt)}). ` : ""}Small categories swing widely — check <i>n</i> before acting. Click any bar or row to filter.`
+    : "No payments match these filters.";
+}
+
+function dist(sl, key, dict) {
+  const rows = D[dict].map((name, i) => ({ i, name, count: 0, amt: 0, dsum: 0, dn: 0, fraud: 0 }));
+  let total = 0;
+  for (let j = 0; j < NC; j++) {
+    if (!sl.cm[j]) continue;
+    const r = rows[CB[key][j]];
+    r.count++; total++; r.amt += CB.a[j] || 0; r.fraud += CB.fr[j];
+    if (CB.dl[j] != null) { r.dsum += CB.dl[j]; r.dn++; }
+  }
+  return rows.filter(r => r.count).map(r => ({ ...r, share: total ? r.count / total : 0, avgDelay: r.dn ? r.dsum / r.dn : null }));
+}
+
+let delayedRows = [];
+const delayedTable = DataTable("t-delayed", {
+  pageSize: 10, sort: 6, dir: -1, placeholder: "Search complaint, merchant, reason", file: "disputes_reported_after_7_days",
+  text: r => `${cbId(r.j)} ${r.m >= 0 ? M.id[r.m] : ""} ${r.u >= 0 ? U.id[r.u] : ""} ${D.reason[CB.r[r.j]]} ${catName(cbCat(r.j))}`,
+  rows: () => delayedRows, onRow: r => openEntity({ type: "c", i: r.j }),
+  cols: [
+    { h: "Complaint", v: r => CB.id[r.j], f: r => cLink(r.j), csv: r => cbId(r.j) },
+    { h: "Merchant", v: r => r.m >= 0 ? M.id[r.m] : null, f: r => r.m >= 0 ? mLink(r.m) : `<span class="dim">unlinked</span>`, csv: r => r.m >= 0 ? M.id[r.m] : "" },
+    { h: "Category", v: r => catName(cbCat(r.j)), f: r => esc(catName(cbCat(r.j))) },
+    { h: "Reason", v: r => D.reason[CB.r[r.j]], f: r => esc(title(D.reason[CB.r[r.j]])) + (CB.fr[r.j] ? ` <span class="pill crit" style="margin-left:4px">Fraud</span>` : "") },
+    { h: "Severity", v: r => SEV_ORDER.indexOf(D.sev[CB.sv[r.j]]), f: r => esc(title(D.sev[CB.sv[r.j]])), csv: r => D.sev[CB.sv[r.j]] },
+    { h: "Disputed", r: 1, v: r => CB.a[r.j], f: r => inrFull(CB.a[r.j]) },
+    { h: "Delay", r: 1, v: r => CB.dl[r.j], f: r => CB.dl[r.j].toFixed(0) + " d" },
+    { h: "Status", v: r => D.res[CB.rs[r.j]], f: r => esc(title(D.res[CB.rs[r.j]])) },
+  ],
+});
+
+function renderDisputes(S, s0, s, k) {
+  const hBar = (id, rows, colorOf, owner, fmtLabel = r => title(r.name), afterLabel) => {
+    const on = F[owner] >= 0;
+    upsert(id, {
+      type: "bar", data: { labels: rows.map(fmtLabel), datasets: [
+        { label: "Complaints", data: rows.map(r => r.count), backgroundColor: rows.map(r => fade(on, F[owner] === r.i, colorOf(r))), borderRadius: { topRight: 3, bottomRight: 3 }, borderSkipped: "left", barPercentage: .74 }] },
+      options: k.base({ indexAxis: "y", scales: { x: k.axis({ beginAtZero: true }), y: k.noGrid({ ticks: { color: k.ink2, padding: 6 } }) } },
+        { callbacks: { label: c => ` ${int(rows[c.dataIndex].count)} complaints (${pct(rows[c.dataIndex].share)})`, afterLabel: c => afterLabel ? afterLabel(rows[c.dataIndex]) : ` ${inr(rows[c.dataIndex].amt)} disputed` } }),
+    }, { onClick: i => toggle(owner, rows[i].i), fmt: v => int(v) });
+  };
+  const reasons = dist(S("rs"), "r", "reason").sort((a, b) => b.count - a.count);
+  hBar("c-reasons", reasons, r => r.fraud ? k.s2 : k.s1, "rs", undefined, r => ` ${inr(r.amt)} disputed · mean delay ${r.avgDelay == null ? "—" : r.avgDelay.toFixed(1) + " d"}`);
+
+  const sev = dist(S("sv"), "sv", "sev").sort((a, b) => SEV_ORDER.indexOf(a.name) - SEV_ORDER.indexOf(b.name));
+  upsert("c-severity", {
+    type: "bar", data: { labels: sev.map(r => title(r.name)), datasets: [
+      { label: "Complaints", data: sev.map(r => r.count), backgroundColor: sev.map((r, i) => fade(F.sv >= 0, F.sv === r.i, k.seq[Math.min(3, SEV_ORDER.indexOf(r.name) < 0 ? 3 : SEV_ORDER.indexOf(r.name))])), borderRadius: { topLeft: 3, topRight: 3 }, borderSkipped: "bottom", barPercentage: .6 }] },
+    options: k.base({ scales: { x: k.noGrid({ ticks: { color: k.ink2 } }), y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 4 } }) } },
+      { callbacks: { label: c => ` ${int(c.raw)} complaints (${pct(sev[c.dataIndex].share)}) · ${inr(sev[c.dataIndex].amt)}` } }),
+  }, { onClick: i => toggle("sv", sev[i].i), fmt: v => int(v) });
+
+  const res = dist(S("res"), "rs", "res").sort((a, b) => (OPEN_RES.has(b.name) - OPEN_RES.has(a.name)) || b.count - a.count);
+  hBar("c-resolution", res, r => OPEN_RES.has(r.name) ? k.warn : k.muted, "res");
+  const chan = dist(S("ch"), "ch", "ch").sort((a, b) => b.count - a.count);
+  hBar("c-channel", chan, () => k.s1, "ch", undefined, r => ` ${inr(r.amt)} disputed · mean delay ${r.avgDelay == null ? "—" : r.avgDelay.toFixed(1) + " d"}`);
+
+  const buckets = ["≤1d", "1–3d", "3–7d", "7–15d", "15–30d", ">30d"].map(b => ({ b, count: 0 }));
+  delayedRows = [];
+  for (let j = 0; j < NC; j++) {
+    if (!s0.cm[j] || CB.dl[j] == null) continue;
+    const d = CB.dl[j];
+    buckets[d <= 1 ? 0 : d <= 3 ? 1 : d <= 7 ? 2 : d <= 15 ? 3 : d <= 30 ? 4 : 5].count++;
+    if (d > 7) { const t = CB.t[j]; delayedRows.push({ j, m: t >= 0 ? T.m[t] : -1, u: t >= 0 ? T.u[t] : -1 }); }
+  }
+  upsert("c-delay", {
+    type: "bar", data: { labels: buckets.map(b => b.b), datasets: [
+      { label: "Complaints", data: buckets.map(b => b.count), backgroundColor: buckets.map((b, i) => i >= 3 ? k.s2 : k.s1), borderRadius: { topLeft: 3, topRight: 3 }, borderSkipped: "bottom", barPercentage: .72 }] },
+    options: k.base({ scales: { x: k.noGrid({ ticks: { color: k.ink2 } }), y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 4 } }) } },
+      { callbacks: { title: c => `Reported ${c[0].label} after payment`, label: c => ` ${int(c.raw)} complaints` } }),
+  }, { fmt: v => int(v) });
+  $("delay-stats").innerHTML = statline([
+    ["Mean", s.delayMean == null ? "—" : s.delayMean.toFixed(1) + " d"], ["Median", s.delayMedian == null ? "—" : s.delayMedian.toFixed(1) + " d"], ["After 7 days", int(s.late)]]).replace(/^<div class="statline">|<\/div>$/g, "");
+  delayedTable.draw();
+
+  const withDelay = reasons.filter(r => r.count >= 20 && r.avgDelay != null).sort((a, b) => a.avgDelay - b.avgDelay);
+  $("disp-lede").innerHTML = s.cbs
+    ? `<b>${int(s.cbs)}</b> complaints worth <b>${inr(s.cbAmt)}</b>. Fraud-type reasons make up <b>${pct(s.fraudShare, 0)}</b> and <b>${pct(s.openShare, 0)}</b> are still open.` +
+      (withDelay.length > 1 ? ` ${esc(title(withDelay[0].name))} is reported fastest (mean ${withDelay[0].avgDelay.toFixed(1)} d); ${esc(title(withDelay.at(-1).name))} slowest (${withDelay.at(-1).avgDelay.toFixed(1)} d).` : "") +
+      ` Click a reason, severity, status or channel to filter the whole page.`
+    : `No chargebacks match these filters.`;
+}
+
+function renderKyc(sl, k) {
+  const rows = D.kyc.map((name, i) => ({ i, name, txns: 0, amt: 0, fail: 0, disp: 0, cbs: 0, camt: 0, fraud: 0 }));
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    const r = rows[T.k[i]];
+    r.txns++; r.amt += T.a[i] || 0;
+    if (T.s[i] === ST_FAIL) r.fail++;
+    if (sl.hit[i]) r.disp++;
+  }
+  for (let j = 0; j < NC; j++) {
+    if (!sl.cm[j] || CB.t[j] < 0) continue;
+    const r = rows[cbKyc(j)];
+    r.cbs++; r.camt += CB.a[j] || 0; r.fraud += CB.fr[j];
+  }
+  const order = n => { const x = KYC_ORDER.indexOf(n); return x < 0 ? 99 : x; };
+  const shown = rows.filter(r => r.txns).sort((a, b) => order(a.name) - order(b.name));
+  const rate = (a, b) => b ? a / b : null;
+  simpleTable("t-kyc", [
+    { h: "KYC status", f: r => kycPill(r.name) }, { h: "Txns", r: 1, f: r => int(r.txns) }, { h: "Value", r: 1, f: r => inr(r.amt) },
+    { h: "Failed", r: 1, f: r => pct(rate(r.fail, r.txns)) }, { h: "Dispute rate", r: 1, f: r => pct(rate(r.disp, r.txns)) },
+    { h: "Chargebacks", r: 1, f: r => int(r.cbs) }, { h: "Fraud-type share", r: 1, f: r => pct(rate(r.fraud, r.cbs), 0) },
+    { h: "Avg disputed", r: 1, f: r => inrFull(rate(r.camt, r.cbs)) },
+  ], shown, { onRow: r => toggle("kyc", r.i), isSel: r => F.kyc === r.i });
+
+  const kd = [...DATA.kyc_dist].sort((a, b) => order(a.kyc_status) - order(b.kyc_status));
+  const kycColor = s => s === "VERIFIED" ? k.good : s === "REJECTED" ? k.crit : k.warn;
+  upsert("c-kyc", {
+    type: "bar", data: { labels: kd.map(x => title(x.kyc_status)), datasets: [
+      { label: "Customers", data: kd.map(x => x.users), backgroundColor: kd.map(x => kycColor(x.kyc_status)), borderRadius: { topLeft: 3, topRight: 3 }, borderSkipped: "bottom", barPercentage: .62 }] },
+    options: k.base({ scales: { x: k.noGrid({ ticks: { color: k.ink2 } }), y: k.axis({ beginAtZero: true, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 5, callback: v => v >= 1000 ? (v / 1000) + "k" : v } }) } },
+      { callbacks: { label: c => ` ${int(c.raw)} customers (${pct(kd[c.dataIndex].share)})` } }),
+  }, { fmt: v => int(v) });
+
+  const by = Object.fromEntries(shown.map(r => [r.name, r]));
+  const rej = by.REJECTED, ver = by.VERIFIED, no = by.NO_KYC_RECORD;
+  $("kyc-lede").innerHTML = shown.length
+    ? (rej && ver ? `Users whose KYC was <b>rejected</b> dispute ${pct(rate(rej.disp, rej.txns))} of their payments versus ${pct(rate(ver.disp, ver.txns))} for verified users — and they are still transacting. ` : "") +
+      (no ? `<b>${int(no.txns)}</b> payments (${pct(rate(no.txns, shown.reduce((s, r) => s + r.txns, 0)), 0)}) come from users with no KYC record at all. ` : "") + `Click a row to filter.`
+    : "No payments match these filters.";
+}
+
+function entityAgg(sl) {
+  const mT = new Uint32Array(NM), mA = new Float64Array(NM), mD = new Uint32Array(NM), mC = new Uint32Array(NM), mCA = new Float64Array(NM), mF = new Uint32Array(NM);
+  const uT = new Uint32Array(NU), uA = new Float64Array(NU), uC = new Uint32Array(NU), uCA = new Float64Array(NU), uF = new Uint32Array(NU), uMax = new Float64Array(NU);
+  const nCl = R.clusters.length;
+  const clT = new Uint32Array(nCl), clA = new Float64Array(nCl), clC = new Uint32Array(nCl), clCA = new Float64Array(nCl), clF = new Uint32Array(nCl);
+  for (let i = 0; i < NT; i++) {
+    if (!sl.tm[i]) continue;
+    const m = T.m[i], u = T.u[i], a = T.a[i] || 0;
+    mT[m]++; mA[m] += a; uT[u]++; uA[u] += a;
+    if (sl.hit[i]) mD[m]++;
+    const ci = txCl(i);
+    if (ci >= 0) { clT[ci]++; clA[ci] += a; }
+  }
+  for (let j = 0; j < NC; j++) {
+    const t = CB.t[j];
+    if (!sl.cm[j] || t < 0) continue;
+    const m = T.m[t], u = T.u[t], a = CB.a[j] || 0;
+    mC[m]++; mCA[m] += a; mF[m] += CB.fr[j];
+    uC[u]++; uCA[u] += a; uF[u] += CB.fr[j]; if (a > uMax[u]) uMax[u] = a;
+    const ci = txCl(t);
+    if (ci >= 0) { clC[ci]++; clCA[ci] += a; clF[ci] += CB.fr[j]; }
+  }
+  const mRows = [], uRows = [], clRows = [];
+  for (let m = 0; m < NM; m++) if (mT[m]) mRows.push({ i: m, id: M.id[m], name: M.name[m], cat: catName(M.cat[m]), st: D.mstatus[M.st[m]], txns: mT[m], amt: mA[m], cbs: mC[m], camt: mCA[m], ratio: mD[m] / mT[m], fraud: mF[m], score: M.score[m], tier: M.tier[m], sig: M.sig[m] });
+  for (let u = 0; u < NU; u++) if (uT[u]) uRows.push({ i: u, id: U.id[u], name: U.name[u], kyc: D.kyc[userKyc(u)], seg: D.seg[userSeg(u)], txns: uT[u], amt: uA[u], cbs: uC[u], camt: uCA[u], max: uMax[u], fraud: uF[u], score: U.score[u], tier: U.tier[u], sig: U.sig[u] });
+  R.clusters.forEach((c, ci) => { if (clT[ci] || clC[ci]) clRows.push({ ci, id: c.id, users: c.u.length, merchants: c.m.length, txns: clT[ci], amt: clA[ci], cbs: clC[ci], camt: clCA[ci], fraud: clF[ci], unv: c.unv, score: c.score }); });
+  return { mRows, uRows, clRows };
+}
+
+let ENT = { mRows: [], uRows: [], clRows: [] };
+let mTier = -1, mMinTx = 1;
+const tierSelect = `<select aria-label="Risk tier">${opt(-1, "All tiers")}${opt(TIER_HIGH, "High")}${opt(TIER_MED, "Medium")}${opt(D.tier.indexOf("LOW"), "Low")}</select>`;
+const merchantTable = DataTable("t-merchants", {
+  pageSize: 12, sort: 9, dir: -1, placeholder: "Search merchant ID, name, category", file: "merchant_risk",
+  text: r => `${r.id} ${r.name || ""} ${r.cat}`,
+  rows: () => ENT.mRows.filter(r => (mTier < 0 || r.tier === mTier) && r.txns >= mMinTx),
+  tiebreak: (a, b) => b.camt - a.camt,
+  onRow: r => openEntity({ type: "m", i: r.i }),
+  cols: [
+    { h: "Merchant", v: r => r.id, f: r => `${mLink(r.i)}<div class="sub">${r.name ? esc(r.name) : "not in merchant master"}</div>` },
+    { h: "Category", v: r => r.cat, f: r => esc(r.cat) },
+    { h: "Status", v: r => r.st, f: r => r.st === "NOT_IN_MASTER" ? `<span class="dim">—</span>` : esc(title(r.st)) },
+    { h: "Txns", r: 1, v: r => r.txns, f: r => int(r.txns) },
+    { h: "Value", r: 1, v: r => r.amt, f: r => inrFull(r.amt) },
+    { h: "CBs", r: 1, v: r => r.cbs, f: r => int(r.cbs) },
+    { h: "Disputed", r: 1, v: r => r.camt, f: r => inrFull(r.camt) },
+    { h: "CB / txn", r: 1, v: r => r.ratio, f: r => pct(r.ratio, 0) },
+    { h: "Fraud", r: 1, v: r => r.fraud, f: r => int(r.fraud) },
+    { h: "Score", r: 1, v: r => r.score, f: r => `<b class="num">${r.score}</b>` },
+    { h: "Tier", v: r => r.tier, f: r => tierPill(D.tier[r.tier]), csv: r => D.tier[r.tier] },
+    { h: "Why flagged", f: r => chips(sigNames(r.sig, "msig")), csv: r => sigNames(r.sig, "msig").join("; ") },
+  ],
+  csv: [["merchant_id", r => r.id], ["merchant_name", r => r.name], ["category", r => r.cat], ["status", r => r.st], ["txns", r => r.txns], ["amount", r => r.amt.toFixed(2)],
+    ["chargebacks", r => r.cbs], ["disputed_amount", r => r.camt.toFixed(2)], ["cb_to_txn_ratio", r => r.ratio.toFixed(4)], ["fraud_chargebacks", r => r.fraud],
+    ["risk_score", r => r.score], ["risk_tier", r => D.tier[r.tier]], ["risk_signals", r => sigNames(r.sig, "msig").join("; ")]],
+});
+merchantTable.extra.innerHTML = tierSelect + `<select aria-label="Minimum transactions">${opt(1, "Any volume")}${opt(2, "≥2 txns")}${opt(3, "≥3 txns")}${opt(5, "≥5 txns")}</select>`;
+{
+  const [tierSel, minSel] = merchantTable.extra.querySelectorAll("select");
+  tierSel.addEventListener("change", e => { mTier = +e.target.value; merchantTable.st.page = 0; merchantTable.draw(); });
+  minSel.addEventListener("change", e => { mMinTx = +e.target.value; merchantTable.st.page = 0; merchantTable.draw(); });
+  const presets = { score: [9, 1], cbs: [5, 1], amt: [6, 1], ratio: [7, 3] };
+  $("m-presets").addEventListener("click", e => {
+    const b = e.target.closest("button[data-p]");
+    if (!b) return;
+    $("m-presets").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    const [col, min] = presets[b.dataset.p];
+    mMinTx = min; minSel.value = String(min);
+    merchantTable.setSort(col, -1);
+  });
+}
+
+let uTier = -1, uRepeat = false, uHV = false;
+const HV = DATA.high_value_threshold;
+const userTable = DataTable("t-users", {
+  pageSize: 12, sort: 8, dir: -1, placeholder: "Search user ID or name", file: "user_risk",
+  text: r => `${r.id} ${r.name || ""}`,
+  rows: () => ENT.uRows.filter(r => (uTier < 0 || r.tier === uTier) && (!uRepeat || r.cbs >= 2) && (!uHV || r.max >= HV)),
+  tiebreak: (a, b) => b.camt - a.camt,
+  onRow: r => openEntity({ type: "u", i: r.i }),
+  cols: [
+    { h: "User", v: r => r.id, f: r => `${uLink(r.i)}<div class="sub">${r.name ? esc(r.name) : "no KYC record"}</div>` },
+    { h: "KYC", v: r => r.kyc, f: r => kycPill(r.kyc) },
+    { h: "Segment", v: r => r.seg, f: r => r.seg === "NO_KYC_RECORD" ? `<span class="dim">—</span>` : esc(title(r.seg)) },
+    { h: "Txns", r: 1, v: r => r.txns, f: r => int(r.txns) },
+    { h: "CBs", r: 1, v: r => r.cbs, f: r => int(r.cbs) },
+    { h: "Disputed", r: 1, v: r => r.camt, f: r => inrFull(r.camt) },
+    { h: "Largest", r: 1, v: r => r.max, f: r => r.max ? inrFull(r.max) : `<span class="dim">—</span>` },
+    { h: "Fraud", r: 1, v: r => r.fraud, f: r => int(r.fraud) },
+    { h: "Score", r: 1, v: r => r.score, f: r => `<b class="num">${r.score}</b>` },
+    { h: "Tier", v: r => r.tier, f: r => tierPill(D.tier[r.tier]), csv: r => D.tier[r.tier] },
+    { h: "Why flagged", f: r => chips(sigNames(r.sig, "usig")), csv: r => sigNames(r.sig, "usig").join("; ") },
+  ],
+  csv: [["user_id", r => r.id], ["full_name", r => r.name], ["kyc_status", r => r.kyc], ["risk_segment", r => r.seg], ["txns", r => r.txns], ["amount", r => r.amt.toFixed(2)],
+    ["chargebacks", r => r.cbs], ["disputed_amount", r => r.camt.toFixed(2)], ["max_disputed", r => r.max.toFixed(2)], ["fraud_chargebacks", r => r.fraud],
+    ["risk_score", r => r.score], ["risk_tier", r => D.tier[r.tier]], ["risk_signals", r => sigNames(r.sig, "usig").join("; ")]],
+});
+userTable.extra.innerHTML = tierSelect + `<label class="check"><input type="checkbox" data-f="repeat"> ≥2 disputes</label><label class="check"><input type="checkbox" data-f="hv"> Chargeback ≥ ${inrFull(HV)}</label>`;
+userTable.extra.addEventListener("change", e => {
+  if (e.target.tagName === "SELECT") uTier = +e.target.value;
+  else if (e.target.dataset.f === "repeat") uRepeat = e.target.checked;
+  else if (e.target.dataset.f === "hv") uHV = e.target.checked;
+  userTable.st.page = 0; userTable.draw();
+});
+
+let selCl = 0;
+const hideTier = new Set();
+const clusterTable = DataTable("t-clusters", {
+  pageSize: 10, sort: 9, dir: -1, placeholder: "Search cluster ID", file: "suspicious_clusters",
+  text: r => `${r.id} ${R.clusters[r.ci].u.map(u => U.id[u]).join(" ")} ${R.clusters[r.ci].m.map(m => M.id[m]).join(" ")}`,
+  rows: () => ENT.clRows, isSel: r => r.ci === selCl,
+  onRow: r => { selCl = r.ci; clusterTable.draw(); drawClusterPanel(); },
+  cols: [
+    { h: "Cluster", v: r => r.id, f: r => `<b class="mono">${esc(r.id)}</b>` },
+    { h: "Users", r: 1, v: r => r.users, f: r => int(r.users) },
+    { h: "Merch.", r: 1, v: r => r.merchants, f: r => int(r.merchants) },
+    { h: "Payments", r: 1, v: r => r.txns, f: r => int(r.txns) },
+    { h: "Value", r: 1, v: r => r.amt, f: r => inr(r.amt) },
+    { h: "CBs", r: 1, v: r => r.cbs, f: r => int(r.cbs) },
+    { h: "Fraud", r: 1, v: r => r.fraud, f: r => int(r.fraud) },
+    { h: "Disputed", r: 1, v: r => r.camt, f: r => inr(r.camt) },
+    { h: "Unverified", r: 1, v: r => r.unv, f: r => int(r.unv) },
+    { h: "Score", r: 1, v: r => r.score, f: r => `<b class="num">${r.score}</b>` },
+  ],
+  csv: [["cluster_id", r => r.id], ["users", r => r.users], ["merchants", r => r.merchants], ["payments", r => r.txns], ["amount", r => r.amt.toFixed(2)], ["chargebacks", r => r.cbs],
+    ["fraud_chargebacks", r => r.fraud], ["disputed_amount", r => r.camt.toFixed(2)], ["unverified_users", r => r.unv], ["cluster_risk_score", r => r.score],
+    ["member_users", r => R.clusters[r.ci].u.map(u => U.id[u]).join(" ")], ["member_merchants", r => R.clusters[r.ci].m.map(m => M.id[m]).join(" ")]],
+});
+function drawClusterPanel() {
+  const c = R.clusters[selCl];
+  if (!c) { $("cl-graph").innerHTML = `<p class="empty">No clusters in this slice</p>`; return; }
+  $("cl-graph-title").textContent = `${c.id} · ${c.u.length} users, ${c.m.length} merchants`;
+  $("cl-graph").innerHTML = clusterSVG(selCl);
+}
+$("cl-open").addEventListener("click", () => { if (R.clusters[selCl]) openEntity({ type: "k", i: selCl }); });
+$("m-tiers").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b) return;
+  const t = D.tier.indexOf(b.dataset.t);
+  if (hideTier.has(t)) hideTier.delete(t); else hideTier.add(t);
+  b.setAttribute("aria-pressed", String(!hideTier.has(t)));
+  renderRisk(ENT, tokens());
+});
+
+function renderRisk(ent, k) {
+  ENT = ent;
+  merchantTable.draw(); userTable.draw();
+  if (!ent.clRows.some(r => r.ci === selCl) && ent.clRows.length) selCl = [...ent.clRows].sort((a, b) => b.score - a.score)[0].ci;
+  clusterTable.draw(); drawClusterPanel();
+
+  const pts = ent.mRows.filter(r => r.cbs > 0 && !hideTier.has(r.tier));
+  const jitter = m => (((m * 9301 + 49297) % 233280) / 233280 - .5) * .5;
+  const tierColor = t => t === TIER_HIGH ? k.crit : t === TIER_MED ? k.warn : k.muted;
+  const group = [TIER_HIGH, TIER_MED, D.tier.indexOf("LOW")].map(t => ({ t, rows: pts.filter(r => r.tier === t) }));
+  upsert("c-m-scatter", {
+    type: "scatter",
+    data: { datasets: group.map(g => ({
+      label: title(D.tier[g.t]) + " tier", data: g.rows.map(r => ({ x: r.cbs + jitter(r.i), y: r.camt / 1000, r })),
+      backgroundColor: hex2rgba(tierColor(g.t), g.t === TIER_HIGH ? .85 : .6), borderColor: k.surface, borderWidth: 1, pointRadius: 4, pointHoverRadius: 7, pointHitRadius: 8,
+    })).reverse() },
+    options: k.base({
+      scales: {
+        x: k.axis({ beginAtZero: true, title: { display: true, text: "Chargebacks in slice", color: k.ink3 }, ticks: { color: k.ink3, padding: 6, stepSize: 1, precision: 0 } }),
+        y: k.axis({ beginAtZero: true, title: { display: true, text: "Disputed amount", color: k.ink3 }, ticks: { color: k.ink3, padding: 6, maxTicksLimit: 6, callback: v => "₹" + v + "k" } }),
+      },
+    }, { callbacks: {
+      title: c => c[0].raw.r.id + (c[0].raw.r.name ? " · " + c[0].raw.r.name : ""),
+      label: c => ` ${int(c.raw.r.cbs)} chargebacks · ${inrFull(c.raw.r.camt)} · score ${c.raw.r.score}`,
+      afterLabel: c => ` ${c.raw.r.cat} · ${int(c.raw.r.txns)} payments · click to open`,
+    } }),
+  }, {
+    onClick: (i, ds) => openEntity({ type: "m", i: charts["c-m-scatter"].data.datasets[ds].data[i].r.i }),
+    table: () => [["Merchant", "Chargebacks", "Disputed", "Score", "Tier"], [...pts].sort((a, b) => b.camt - a.camt).map(r => [r.id, int(r.cbs), inrFull(r.camt), String(r.score), title(D.tier[r.tier])])],
+  });
+
+  const hm = ent.mRows.filter(r => r.tier === TIER_HIGH).length, rep = ent.mRows.filter(r => r.cbs >= 2).length;
+  $("m-lede").innerHTML = `<b>${int(hm)}</b> high-risk merchants and <b>${int(rep)}</b> with two or more disputes have payments in this slice. Score adds points for repeated disputes, a chargeback ratio above 30%, fraud-type reasons, top-decile disputed amount, a spike followed by disputes, transacting while inactive, missing settlement account and absence from the master. <b>≥50 = high</b>, 30–49 = medium. Click any row or dot for the merchant's payments, disputes and network.`;
+  const urep = ent.uRows.filter(r => r.cbs >= 2).length, uhv = ent.uRows.filter(r => r.max >= HV).length;
+  $("u-lede").innerHTML = `<b>${int(urep)}</b> customers in this slice disputed two or more payments and <b>${int(uhv)}</b> raised a high-value chargeback (≥ <b>${inrFull(HV)}</b>, the top 10% of disputed amounts). Click a row to see who they paid.`;
+  const clCbs = ent.clRows.reduce((s, r) => s + r.cbs, 0);
+  $("cl-lede").innerHTML = `Users and merchants that touch at least one chargeback are joined by every payment between them; components with four or more members are candidate rings. <b>${int(ent.clRows.length)}</b> of ${int(R.clusters.length)} clusters have activity in this slice, carrying <b>${int(clCbs)}</b> chargebacks. Click a row to draw it, then click any node to open that user or merchant.`;
+}
+
+/* ======================================================================= network graphics */
+const idOf = (k, i) => k === "u" ? U.id[i] : M.id[i];
+const hasCb = (k, i) => (k === "u" ? uCb : mCb)[i] > 0;
+const f1 = v => v.toFixed(1);
+function nodeSVG(n, label) {
+  const shape = n.k === "u" ? `<circle cx="${f1(n.x)}" cy="${f1(n.y)}" r="${n.r}"/>` : `<rect x="${f1(n.x - n.r)}" y="${f1(n.y - n.r)}" width="${2 * n.r}" height="${2 * n.r}" rx="2"/>`;
+  const name = idOf(n.k, n.i), cb = hasCb(n.k, n.i);
+  const attrs = n.center ? "" : ` tabindex="0" role="button" data-open="${n.k}:${n.i}" aria-label="Open ${esc(name)}"`;
+  return `<g class="node ${n.k}${cb ? " cb" : ""}${n.center ? " c" : ""}"${attrs}><title>${esc(name)}${cb ? " · has chargebacks" : ""}</title>${shape}${label || ""}</g>`;
+}
+function egoSVG(kind, c) {
+  const W = 560, H = 380, cx = W / 2, cy = H / 2, R1 = 112, R2 = 172;
+  const other = kind === "m" ? "u" : "m";
+  const txOf = (k, i) => k === "m" ? txByM[i] : txByU[i];
+  const partner = (k, t) => k === "m" ? T.u[t] : T.m[t];
+  const group = (k, i, exclude) => {
+    const g = new Map();
+    for (const t of txOf(k, i)) {
+      const p = partner(k, t);
+      if (p === exclude) continue;
+      const e = g.get(p) || { n: 0, d: 0 };
+      e.n++; if (cbByT.has(t)) e.d++;
+      g.set(p, e);
+    }
+    return [...g];
+  };
+  const ring1All = group(kind, c, -1).sort((a, b) => b[1].d - a[1].d || b[1].n - a[1].n);
+  const ring1 = ring1All.slice(0, 18), n1 = ring1.length;
+  const nodes = [{ k: kind, i: c, x: cx, y: cy, r: 11, center: true }], edges = [];
+  const seen = new Set([kind + c]);
+  ring1.forEach(([p]) => seen.add(other + p));
+  let n2 = 0, hidden = ring1All.length - n1;
+  ring1.forEach(([p, e], idx) => {
+    const ang = -Math.PI / 2 + 2 * Math.PI * idx / Math.max(n1, 1);
+    const x = cx + R1 * Math.cos(ang), y = cy + R1 * Math.sin(ang) * .85;
+    nodes.push({ k: other, i: p, x, y, r: 7, ang });
+    edges.push({ x1: cx, y1: cy, x2: x, y2: y, d: e.d > 0 });
+    const kids = group(other, p, c).filter(([q]) => !seen.has(kind + q));
+    const take = kids.slice(0, Math.max(0, Math.min(6, 42 - n2)));
+    hidden += kids.length - take.length;
+    const spread = Math.min(.9, 2 * Math.PI / Math.max(n1, 1) * .7);
+    take.forEach(([q, e2], k2) => {
+      const a2 = ang + (take.length === 1 ? 0 : spread * (k2 / (take.length - 1) - .5));
+      const x2 = cx + R2 * Math.cos(a2), y2 = cy + R2 * Math.sin(a2) * .95;
+      nodes.push({ k: kind, i: q, x: x2, y: y2, r: 4.5 });
+      seen.add(kind + q); n2++;
+      edges.push({ x1: x, y1: y, x2, y2, d: e2.d > 0 });
+    });
+  });
+  hidden = Math.max(0, hidden);
+  const label = n => {
+    if (n.center) return `<text x="${f1(n.x)}" y="${f1(n.y + 26)}" text-anchor="middle" style="font-weight:600;fill:var(--ink)">${esc(idOf(n.k, n.i))}</text>`;
+    if (n.r !== 7 || n1 > 12) return "";
+    const dx = Math.cos(n.ang), dy = Math.sin(n.ang);
+    return `<text x="${f1(n.x + dx * 14)}" y="${f1(n.y + dy * 14 + 3)}" text-anchor="${dx > .3 ? "start" : dx < -.3 ? "end" : "middle"}">${esc(idOf(n.k, n.i))}</text>`;
+  };
+  const who = kind === "m" ? "users who paid this merchant, and the other merchants they paid" : "merchants this user paid, and the other users who paid them";
+  return `<svg class="net" viewBox="0 0 ${W} ${H}" role="img" aria-label="Payment network: ${who}">` +
+    edges.map(e => `<line class="e${e.d ? " d" : ""}" x1="${f1(e.x1)}" y1="${f1(e.y1)}" x2="${f1(e.x2)}" y2="${f1(e.y2)}"/>`).join("") +
+    nodes.map(n => nodeSVG(n, label(n))).join("") + `</svg>` +
+    `<div class="legend"><span><i class="dot" style="background:var(--muted-mark)"></i>User</span><span><i style="background:var(--muted-mark)"></i>Merchant</span><span><i style="background:var(--s2)"></i>Has chargebacks</span><span><i class="line" style="background:var(--s2)"></i>Disputed payment</span>${hidden ? `<span class="dim">${int(hidden)} more links not drawn</span>` : ""}</div>` +
+    `<p class="note" style="margin:0">Inner ring: ${who.split(",")[0]}. Outer ring: ${who.split(", and ")[1]}. Click a node to open it.</p>`;
+}
+function clusterSVG(ci) {
+  const c = R.clusters[ci], mset = new Set(c.m);
+  const W = 560, rows = Math.max(c.u.length, c.m.length), H = Math.max(180, rows * 38 + 40);
+  const pos = new Map();
+  const place = (list, k, x) => list.forEach((i, idx) => pos.set(k + i, { k, i, x, y: list.length === 1 ? H / 2 : 24 + (H - 48) * idx / (list.length - 1), r: 8 }));
+  place(c.u, "u", 170); place(c.m, "m", 390);
+  const pairs = new Map();
+  for (const u of c.u) for (const t of txByU[u]) {
+    if (!mset.has(T.m[t])) continue;
+    const key = u + ":" + T.m[t], e = pairs.get(key) || { u, m: T.m[t], n: 0, d: 0 };
+    e.n++; if (cbByT.has(t)) e.d++;
+    pairs.set(key, e);
+  }
+  const edges = [...pairs.values()].map(e => { const a = pos.get("u" + e.u), b = pos.get("m" + e.m); return `<line class="e${e.d ? " d" : ""}" x1="${a.x}" y1="${f1(a.y)}" x2="${b.x}" y2="${f1(b.y)}"><title>${esc(U.id[e.u])} → ${esc(M.id[e.m])}: ${e.n} payment${e.n > 1 ? "s" : ""}, ${e.d} disputed</title></line>`; }).join("");
+  const nodes = [...pos.values()].map(n => nodeSVG(n, `<text x="${n.k === "u" ? n.x - 14 : n.x + 14}" y="${f1(n.y + 3.5)}" text-anchor="${n.k === "u" ? "end" : "start"}">${esc(idOf(n.k, n.i))}</text>`)).join("");
+  return `<svg class="net" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cluster ${esc(c.id)}: users on the left, merchants on the right">` +
+    `<text x="170" y="14" text-anchor="middle" style="fill:var(--ink-3)">USERS</text><text x="390" y="14" text-anchor="middle" style="fill:var(--ink-3)">MERCHANTS</text>` +
+    edges + nodes + `</svg>`;
+}
+
+/* ======================================================================= drawer */
+const drawer = $("drawer"), backdrop = $("backdrop");
+let current = null, history_ = [], lastFocus = null;
+const KIND = { m: "Merchant", u: "Customer", t: "Transaction", c: "Complaint", k: "Suspicious cluster" };
+function openEntity(ref, push = true) {
+  if (drawer.hidden) { lastFocus = document.activeElement; history_ = []; }
+  else if (push && current && !(current.type === ref.type && current.i === ref.i)) history_.push(current);
+  current = ref;
+  hideTip();
+  $("dr-body").innerHTML = ({ m: drawMerchant, u: drawUser, t: drawTxn, c: drawComplaint, k: drawCluster })[ref.type](ref.i);
+  $("dr-kind").textContent = KIND[ref.type];
+  $("dr-back").hidden = !history_.length;
+  drawer.hidden = false; backdrop.hidden = false;
+  document.body.classList.add("locked");
+  drawer.scrollTop = 0;
+  $("dr-close").focus();
+}
+function closeDrawer() {
+  drawer.hidden = true; backdrop.hidden = true; current = null; history_ = [];
+  document.body.classList.remove("locked");
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+}
+$("dr-close").addEventListener("click", closeDrawer);
+backdrop.addEventListener("click", closeDrawer);
+$("dr-back").addEventListener("click", () => { const prev = history_.pop(); if (prev) openEntity(prev, false); });
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-open]");
+  if (!el) return;
+  e.preventDefault();
+  const [type, i] = el.getAttribute("data-open").split(":");
+  openEntity({ type, i: +i });
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !drawer.hidden) { closeDrawer(); return; }
+  const g = e.target.closest?.("g[data-open]");
+  if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); const [type, i] = g.getAttribute("data-open").split(":"); openEntity({ type, i: +i }); }
+});
+
+const kv = pairs => `<dl class="kv">${pairs.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("")}</dl>`;
+function txTable(list, partnerKind) {
+  const rows = [...list].sort((a, b) => T.d[a] - T.d[b] || T.mi[a] - T.mi[b]);
+  if (!rows.length) return `<p class="note">No payments.</p>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Txn</th><th>${partnerKind === "u" ? "User" : "Merchant"}</th><th class="r">Amount</th><th>Status</th><th class="r">CBs</th></tr></thead><tbody>` +
+    rows.map(i => `<tr><td>${esc(dayFmt(T.d[i]))} <span class="dim">${timeFmt(i)}</span></td><td>${tLink(i)}</td><td>${partnerKind === "u" ? uLink(T.u[i]) : mLink(T.m[i])}</td><td class="r">${inrFull(T.a[i])}</td><td>${statusPill(T.s[i])}</td><td class="r">${cbByT.has(i) ? `<b>${cbByT.get(i).length}</b>` : `<span class="dim">0</span>`}</td></tr>`).join("") + `</tbody></table></div>`;
+}
+function cbTable(list) {
+  if (!list.length) return `<p class="note">No chargebacks.</p>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Complaint</th><th>Reason</th><th>Severity</th><th class="r">Disputed</th><th class="r">Delay</th><th>Status</th></tr></thead><tbody>` +
+    list.map(j => `<tr><td>${cLink(j)}</td><td>${esc(title(D.reason[CB.r[j]]))}${CB.fr[j] ? ` <span class="pill crit">Fraud</span>` : ""}</td><td>${esc(title(D.sev[CB.sv[j]]))}</td><td class="r">${inrFull(CB.a[j])}</td><td class="r">${CB.dl[j] == null ? "—" : CB.dl[j].toFixed(1) + " d"}</td><td>${OPEN_RES.has(D.res[CB.rs[j]]) ? `<span class="pill warn">${esc(title(D.res[CB.rs[j]]))}</span>` : esc(title(D.res[CB.rs[j]]))}</td></tr>`).join("") + `</tbody></table></div>`;
+}
+const sigBlock = (mask, dict) => { const s = sigNames(mask, dict); return s.length ? `<div><h3 style="margin-bottom:6px">Why flagged</h3>${chips(s)}</div>` : `<p class="note">No risk signals fired.</p>`; };
+
+function drawMerchant(m) {
+  const tx = txByM[m], cbs = tx.flatMap(i => cbByT.get(i) || []);
+  const amt = tx.reduce((s, i) => s + (T.a[i] || 0), 0), disp = tx.filter(i => cbByT.has(i)).length;
+  const camt = cbs.reduce((s, j) => s + (CB.a[j] || 0), 0), fraud = cbs.reduce((s, j) => s + CB.fr[j], 0);
+  const st = D.mstatus[M.st[m]];
+  return `<header class="dr-head"><div class="eyebrow">Merchant · ${esc(catName(M.cat[m]))}</div><h2 id="dr-title">${esc(M.id[m])}</h2>
+    <p>${M.name[m] ? esc(M.name[m]) : `<span class="dim">Not in merchant master</span>`}${M.city[m] ? " · " + esc(M.city[m]) : ""}</p>
+    <div class="pills">${tierPill(D.tier[M.tier[m]])}<span class="pill ${st === "ACTIVE" ? "good" : st === "NOT_IN_MASTER" ? "plain" : "crit"}">${esc(title(st))}</span><span class="pill plain">Settlement: ${esc(title(D.settle[M.se[m]]))}</span></div>${entityActions("m", m)}</header>
+    ${statline([["Risk score", `${M.score[m]}`], ["Payments", int(tx.length)], ["Value", inr(amt)], ["Chargebacks", `${int(cbs.length)} <span class="dim" style="font-size:13px">${fraud} fraud</span>`], ["Disputed", inr(camt)], ["CB / txn", pct(tx.length ? disp / tx.length : 0, 0)]])}
+    ${sigBlock(M.sig[m], "msig")}
+    ${mCl[m] >= 0 ? `<p style="margin:0">Part of suspicious cluster ${kLink(mCl[m])}</p>` : ""}
+    <h3>Payment network</h3>${egoSVG("m", m)}
+    <h3>Payments <span class="static">Whole quarter</span></h3>${txTable(tx, "u")}
+    <h3>Chargebacks</h3>${cbTable(cbs)}`;
+}
+function drawUser(u) {
+  const tx = txByU[u], cbs = tx.flatMap(i => cbByT.get(i) || []);
+  const amt = tx.reduce((s, i) => s + (T.a[i] || 0), 0);
+  const camt = cbs.reduce((s, j) => s + (CB.a[j] || 0), 0), fraud = cbs.reduce((s, j) => s + CB.fr[j], 0);
+  const kyc = D.kyc[userKyc(u)], seg = D.seg[userSeg(u)];
+  return `<header class="dr-head"><div class="eyebrow">Customer</div><h2 id="dr-title">${esc(U.id[u])}</h2>
+    <p>${U.name[u] ? esc(U.name[u]) : `<span class="dim">No KYC record</span>`}${U.city[u] ? " · " + esc(U.city[u]) : ""}${U.inc[u] != null ? " · income " + inrFull(U.inc[u]) + "/month" : ""}</p>
+    <div class="pills">${tierPill(D.tier[U.tier[u]])}${kycPill(kyc)}${seg && seg !== "NO_KYC_RECORD" ? `<span class="pill plain">${esc(title(seg))} segment</span>` : ""}${U.idc[u] > 1 ? `<span class="pill warn">ID shared by ${U.idc[u]} KYC records</span>` : ""}</div>${entityActions("u", u)}</header>
+    ${statline([["Risk score", `${U.score[u]}`], ["Payments", int(tx.length)], ["Value", inr(amt)], ["Chargebacks", `${int(cbs.length)} <span class="dim" style="font-size:13px">${fraud} fraud</span>`], ["Disputed", inr(camt)], ["Merchants paid", int(new Set(tx.map(i => T.m[i])).size)]])}
+    ${sigBlock(U.sig[u], "usig")}
+    ${uCl[u] >= 0 ? `<p style="margin:0">Part of suspicious cluster ${kLink(uCl[u])}</p>` : ""}
+    <h3>Payment network</h3>${egoSVG("u", u)}
+    <h3>Payments</h3>${txTable(tx, "m")}
+    <h3>Chargebacks</h3>${cbTable(cbs)}`;
+}
+function drawTxn(i) {
+  const cbs = cbByT.get(i) || [];
+  return `<header class="dr-head"><div class="eyebrow">Transaction</div><h2 id="dr-title">${txnId(i)}</h2>
+    <p>${inrFull(T.a[i])} on ${esc(dayFmt(T.d[i]))}, ${timeFmt(i)}</p><div class="pills">${statusPill(T.s[i])}${D.utr[T.x[i]] === "VALID" ? `<span class="pill plain">UTR valid</span>` : `<span class="pill warn">UTR ${esc(D.utr[T.x[i]].toLowerCase())}</span>`}${cbs.length ? `<span class="pill crit">Disputed</span>` : ""}</div></header>
+    ${kv([["User", uLink(T.u[i])], ["User KYC", kycPill(D.kyc[T.k[i]])], ["Merchant", mLink(T.m[i]) + (M.name[T.m[i]] ? ` <span class="dim">${esc(M.name[T.m[i]])}</span>` : "")], ["Category", esc(catName(T.c[i]))],
+      ["Weekday", DOW[dowOf(T.d[i])]], txCl(i) >= 0 && ["Cluster", kLink(txCl(i))]])}
+    <h3>Chargebacks on this payment</h3>${cbTable(cbs)}`;
+}
+function drawComplaint(j) {
+  const t = CB.t[j], res = D.res[CB.rs[j]];
+  return `<header class="dr-head"><div class="eyebrow">Complaint</div><h2 id="dr-title">${cbId(j)}</h2>
+    <p>${esc(title(D.reason[CB.r[j]]))} · ${inrFull(CB.a[j])} disputed</p>
+    <div class="pills">${CB.fr[j] ? `<span class="pill crit">Fraud-type</span>` : `<span class="pill plain">Service / billing</span>`}<span class="pill ${OPEN_RES.has(res) ? "warn" : "plain"}">${esc(title(res))}</span><span class="pill plain">${esc(title(D.sev[CB.sv[j]]))} severity</span></div></header>
+    ${kv([
+      ["Transaction", t >= 0 ? `${tLink(t)} <span class="dim">${inrFull(T.a[t])} · ${esc(dayFmt(T.d[t]))}</span>` : `<span class="dim">No usable txn_id — not attributed</span>`],
+      t >= 0 && ["User", uLink(T.u[t])], t >= 0 && ["Merchant", mLink(T.m[t])],
+      ["Category", esc(catName(cbCat(j)))], ["KYC", kycPill(D.kyc[cbKyc(j)])],
+      ["Channel", esc(title(D.ch[CB.ch[j]]))], ["Reported", CB.rd[j] == null ? "—" : esc(dayFmt(CB.rd[j]))],
+      ["Reporting delay", CB.dl[j] == null ? `<span class="dim">unknown / impossible</span>` : `${CB.dl[j].toFixed(1)} days${CB.dl[j] > 7 ? ` <span class="pill warn">Late</span>` : ""}`],
+      ["Txn amount on file", inrFull(CB.ta[j])],
+      t >= 0 && txCl(t) >= 0 && ["Cluster", kLink(txCl(t))],
+    ])}`;
+}
+function drawCluster(ci) {
+  const c = R.clusters[ci], mset = new Set(c.m);
+  const tx = c.u.flatMap(u => txByU[u].filter(t => mset.has(T.m[t])));
+  const cbs = tx.flatMap(t => cbByT.get(t) || []);
+  const amt = tx.reduce((s, t) => s + (T.a[t] || 0), 0), camt = cbs.reduce((s, j) => s + (CB.a[j] || 0), 0), fraud = cbs.reduce((s, j) => s + CB.fr[j], 0);
+  const hub = c.hub.slice(2), hubLink = c.hub[0] === "U" ? (uIndex.has(hub) ? uLink(uIndex.get(hub)) : idc(hub)) : (mIndex.has(hub) ? mLink(mIndex.get(hub)) : idc(hub));
+  return `<header class="dr-head"><div class="eyebrow">Suspicious cluster</div><h2 id="dr-title">${esc(c.id)}</h2>
+    <p>${c.u.length} users and ${c.m.length} merchants linked by ${int(tx.length)} payments. Hub: ${hubLink} <span class="dim">${c.hd} links</span></p></header>
+    ${statline([["Cluster score", String(c.score)], ["Payments", int(tx.length)], ["Value", inr(amt)], ["Chargebacks", `${int(cbs.length)} <span class="dim" style="font-size:13px">${fraud} fraud</span>`], ["Disputed", inr(camt)], ["Unverified users", int(c.unv)]])}
+    <h3>Ring graph</h3>${clusterSVG(ci)}
+    <div class="legend"><span><i class="dot" style="background:var(--muted-mark)"></i>User</span><span><i style="background:var(--muted-mark)"></i>Merchant</span><span><i style="background:var(--s2)"></i>Has chargebacks</span><span><i class="line" style="background:var(--s2)"></i>Disputed payment</span></div>
+    <h3>Members</h3>${kv([["Users", `<div class="chips">${c.u.map(uLink).join("")}</div>`], ["Merchants", `<div class="chips">${c.m.map(mLink).join("")}</div>`]])}
+    <h3>Payments inside the ring</h3>${txTable(tx, "m")}
+    <h3>Chargebacks</h3>${cbTable(cbs)}`;
+}
+
+/* ======================================================================= ID lookup */
+$("search").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const s = e.target.value.trim().toUpperCase().replace(/[\s_-]+/g, "");
+  const msg = $("search-msg");
+  msg.textContent = "";
+  if (!s) return;
+  let m, ref = null;
+  if ((m = s.match(/^USR(\d+)$/))) { const i = uIndex.get("USR" + m[1]); if (i != null) ref = { type: "u", i }; }
+  else if ((m = s.match(/^MCH(\d+)$/))) { const i = mIndex.get("MCH" + m[1]); if (i != null) ref = { type: "m", i }; }
+  else if ((m = s.match(/^TXN(\d+)$/))) { txIndex ??= new Map(T.id.map((v, i) => [v, i])); const i = txIndex.get(+m[1]); if (i != null) ref = { type: "t", i }; }
+  else if ((m = s.match(/^CBK(\d+)$/))) { cbIndex ??= new Map(CB.id.map((v, i) => [v, i])); const i = cbIndex.get(+m[1]); if (i != null) ref = { type: "c", i }; }
+  else if ((m = s.match(/^CL(\d+)$/))) { const i = R.clusters.findIndex(c => +c.id.slice(2) === +m[1]); if (i >= 0) ref = { type: "k", i }; }
+  if (ref) openEntity(ref);
+  else msg.textContent = /^(USR|MCH|TXN|CBK|CL)\d+$/.test(s) ? "No such ID in this dataset" : "Try USR…, MCH…, TXN…, CBK… or CL…";
+});
+
+/* ======================================================================= watchlist (pins stored by ID, so they survive rebuilds) */
+let watch = [];
+try { const w = JSON.parse(localStorage.getItem("upi-desk-watch") || "[]"); if (Array.isArray(w)) watch = w.filter(x => typeof x === "string"); } catch (e) { /* storage blocked or corrupt */ }
+const saveWatch = () => { try { localStorage.setItem("upi-desk-watch", JSON.stringify(watch)); } catch (e) { /* storage blocked */ } };
+const watchKey = (type, i) => type + ":" + (type === "m" ? M.id[i] : U.id[i]);
+const isWatched = (type, i) => watch.includes(watchKey(type, i));
+const pinLabel = on => on ? "★ Watching" : "☆ Watch";
+function entityActions(type, i) {
+  const on = isWatched(type, i);
+  return `<div class="dr-actions"><button type="button" class="mini" data-pin="${type}:${i}" aria-pressed="${on}">${pinLabel(on)}</button>` +
+    `<button type="button" class="mini" data-focus="${type}:${i}">Filter page to this ${type === "m" ? "merchant" : "customer"}</button></div>`;
+}
+function watchRows() {
+  const mAgg = new Map(ENT.mRows.map(r => [r.i, r])), uAgg = new Map(ENT.uRows.map(r => [r.i, r]));
+  return watch.map(key => {
+    const type = key[0], id = key.slice(2), i = (type === "m" ? mIndex : uIndex).get(id);
+    if (i == null) return null;
+    const E = type === "m" ? M : U, a = (type === "m" ? mAgg : uAgg).get(i);
+    return { key, type, i, id, name: E.name[i], score: E.score[i], tier: E.tier[i], txns: a ? a.txns : 0, amt: a ? a.amt : 0, cbs: a ? a.cbs : 0, camt: a ? a.camt : 0, fraud: a ? a.fraud : 0 };
+  }).filter(Boolean);
+}
+const watchTable = DataTable("t-watch", {
+  pageSize: 10, sort: 7, dir: -1, placeholder: "Search pinned IDs", file: "watchlist",
+  text: r => `${r.id} ${r.name || ""}`, rows: watchRows,
+  onRow: r => openEntity({ type: r.type, i: r.i }),
+  cols: [
+    { h: "Pinned", v: r => r.id, f: r => `${r.type === "m" ? mLink(r.i) : uLink(r.i)}<div class="sub">${r.type === "m" ? "Merchant" : "Customer"}${r.name ? " · " + esc(r.name) : ""}</div>` },
+    { h: "Txns", r: 1, v: r => r.txns, f: r => int(r.txns) },
+    { h: "Value", r: 1, v: r => r.amt, f: r => inrFull(r.amt) },
+    { h: "CBs", r: 1, v: r => r.cbs, f: r => int(r.cbs) },
+    { h: "Disputed", r: 1, v: r => r.camt, f: r => inrFull(r.camt) },
+    { h: "Fraud", r: 1, v: r => r.fraud, f: r => int(r.fraud) },
+    { h: "Tier", v: r => r.tier, f: r => tierPill(D.tier[r.tier]), csv: r => D.tier[r.tier] },
+    { h: "Score", r: 1, v: r => r.score, f: r => `<b class="num">${r.score}</b>` },
+    { h: "", f: r => `<button type="button" class="mini" data-unpin="${esc(r.key)}">Unpin</button>` },
+  ],
+});
+function renderWatch() {
+  watchTable.draw();
+  const rows = watchRows();
+  $("w-lede").innerHTML = rows.length
+    ? `<b>${int(rows.length)}</b> pinned · <b>${int(rows.reduce((s, r) => s + r.cbs, 0))}</b> chargebacks worth <b>${inr(rows.reduce((s, r) => s + r.camt, 0))}</b> in this slice. Pins are kept in this browser, so the list survives reloads and rebuilds.`
+    : `Nothing pinned yet. Open any merchant or customer and press <b>☆ Watch</b> to track it here while you filter.`;
+  $("w-clear").disabled = !rows.length;
+  document.querySelectorAll("[data-pin]").forEach(b => { const on = isWatched(b.dataset.pin[0], +b.dataset.pin.slice(2)); b.textContent = pinLabel(on); b.setAttribute("aria-pressed", String(on)); });
+}
+function toggleWatch(type, i) {
+  const key = watchKey(type, i);
+  watch = watch.includes(key) ? watch.filter(x => x !== key) : [...watch, key];
+  saveWatch(); renderWatch();
+}
+// capture phase, so Unpin never also opens the row's drawer
+$("t-watch").addEventListener("click", e => {
+  const b = e.target.closest("[data-unpin]");
+  if (!b) return;
+  e.stopPropagation();
+  watch = watch.filter(x => x !== b.dataset.unpin);
+  saveWatch(); renderWatch();
+}, true);
+$("w-clear").addEventListener("click", () => { watch = []; saveWatch(); renderWatch(); });
+document.addEventListener("click", e => {
+  const pin = e.target.closest("[data-pin]");
+  if (pin) { toggleWatch(pin.dataset.pin[0], +pin.dataset.pin.slice(2)); return; }
+  const foc = e.target.closest("[data-focus]");
+  if (!foc) return;
+  const type = foc.dataset.focus[0], i = +foc.dataset.focus.slice(2);
+  closeDrawer();
+  setF(type === "m" ? { mch: i } : { usr: i });
+  scrollTo({ top: Math.max(0, $("kpis").getBoundingClientRect().top + scrollY - 120), behavior: reduceMotion ? "auto" : "smooth" });
+});
+
+/* ======================================================================= keyboard shortcuts */
+const toggleHelp = () => { $("kbd-help").hidden = !$("kbd-help").hidden; };
+$("kbd-btn").addEventListener("click", toggleHelp);
+document.addEventListener("keydown", e => {
+  if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest?.("input, select, textarea, [contenteditable]")) { if (e.key === "Escape") e.target.blur(); return; }
+  if (!drawer.hidden) { if (e.key === "Backspace" && history_.length) { e.preventDefault(); $("dr-back").click(); } return; }
+  if (e.key === "/") { e.preventDefault(); $("search").focus(); }
+  else if (e.key === "[" || e.key === "]") stepPeriod(e.key === "[" ? -1 : 1);
+  else if (e.key === "r" || e.key === "R") $("f-reset").click();
+  else if (e.key === "t" || e.key === "T") $("theme-btn").click();
+  else if (e.key === "?") toggleHelp();
+  else if (e.key === "Escape") $("kbd-help").hidden = true;
+});
+
+/* ======================================================================= main render */
+function render() {
+  const cache = {};
+  const S = (ign = "") => cache[ign] || (cache[ign] = slice(F, ign));
+  const s0 = S(), sum = summarize(s0), k = tokens(), ent = entityAgg(s0);
+  const pr = priorRange(F), priorSl = pr ? slice({ ...F, from: pr[0], to: pr[1] }) : null;
+  syncControls();
+  renderChips(sum, pr);
+  renderKpis(sum, isFiltered(F), ent, priorSl ? summarize(priorSl) : null, pr);
+  const rows = dailyRows(s0);
+  renderVolume(rows, sum, k, priorSl ? dailyRows(priorSl, pr[0], pr[1]) : null);
+  renderFailures(rows, S("time"), sum, k);
+  renderUtr(S("utr"));
+  renderCategories(S("cat"), k);
+  renderDisputes(S, s0, sum, k);
+  renderKyc(S("kyc"), k);
+  renderRisk(ent, k);
+  renderWatch();
+}
+
+F = readHash();
+render();
+window.addEventListener("hashchange", () => { const f = readHash(); if (Object.keys(F0).some(k => f[k] !== F[k])) { F = f; render(); } });
+const rebuild = () => { Object.keys(charts).forEach(id => { charts[id].destroy(); delete charts[id]; }); document.querySelectorAll(".brush").forEach(b => b.remove()); render(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rebuild);
+new MutationObserver(rebuild).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
