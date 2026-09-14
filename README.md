@@ -71,33 +71,29 @@ transaction behaviour.
 
 Categories with ≥ 1,000 payments (smaller books swing too much to rank):
 
-| Category | Payments | Value | Dispute rate | | Chargebacks | Disputed | Fraud-type |
-|:---|---:|---:|---:|:---|---:|---:|---:|
-| 🔴 **Transportation** | 2,972 | ₹3.70 Cr | **13.4%** | `████████████████████` | 434 | ₹14.99 L | 35% |
-| 🟠 Restaurants | 2,991 | ₹3.69 Cr | 12.8% | `███████████████████` | 404 | ₹15.16 L | 41% |
-| 🟠 Grocery | 5,838 | ₹7.37 Cr | 12.4% | `███████████████████` | 759 | **₹29.38 L** | 37% |
-| 🟢 Hotels & Lodging | 2,962 | ₹3.70 Cr | 11.6% | `█████████████████` | 361 | ₹12.90 L | 34% |
-| 🟢 Pharmacy | 3,013 | ₹3.70 Cr | 11.5% | `█████████████████` | 374 | ₹12.95 L | 38% |
+| Category | Payments | Dispute rate | Chargebacks | Disputed | Fraud-type |
+|:---|---:|:---|---:|---:|---:|
+| 🔴 **Transportation** | 2,972 | **13.4%** `████████████` | 434 | ₹14.99 L | 35% |
+| 🟠 Restaurants | 2,991 | 12.8% `███████████` | 404 | ₹15.16 L | 41% |
+| 🟠 Grocery | 5,838 | 12.4% `███████████` | 759 | **₹29.38 L** | 37% |
+| 🟢 Hotels & Lodging | 2,962 | 11.6% `██████████` | 361 | ₹12.90 L | 34% |
+| 🟢 Pharmacy | 3,013 | 11.5% `██████████` | 374 | ₹12.95 L | 38% |
 
 <sub>Dispute rate = payments with ≥1 linked chargeback ÷ payments. 🔴 above the 12.3% overall rate by >1 pt · 🟠 above · 🟢 below.</sub>
 
 ### 🪪 KYC status vs dispute behaviour
 
-| KYC status | Payments | Value | Dispute rate | | Failed rate | Fraud-type share |
-|:---|---:|---:|---:|:---|---:|---:|
-| ⛔ **Rejected** | 521 | ₹0.62 Cr | **15.0%** | `████████████████████` | 11.1% | 28% |
-| ⏳ In review | 364 | ₹0.46 Cr | 14.0% | `███████████████████` | 10.2% | 31% |
-| ✅ Verified | 4,978 | ₹6.19 Cr | 13.2% | `██████████████████` | 9.5% | 39% |
-| ❓ No KYC record | 13,522 | ₹16.95 Cr | 11.9% | `████████████████` | 9.8% | 37% |
-| 🕓 Pending | 615 | ₹0.75 Cr | 8.9% | `████████████` | 8.9% | 43% |
+| KYC status | Payments | Dispute rate | Failed rate | Fraud-type share |
+|:---|---:|:---|---:|---:|
+| ⛔ **Rejected** | 521 | **15.0%** `████████████` | 11.1% | 28% |
+| ⏳ In review | 364 | 14.0% `███████████` | 10.2% | 31% |
+| ✅ Verified | 4,978 | 13.2% `███████████` | 9.5% | 39% |
+| ❓ No KYC record | 13,522 | 11.9% `██████████` | 9.8% | 37% |
+| 🕓 Pending | 615 | 8.9% `███████` | 8.9% | 43% |
 
 <sub>Customer base: 28,920 KYC users · 77.4% verified · 8.2% rejected.</sub>
 
 ### ⚖️ Chargebacks: why, and how late
-
-<table>
-<tr>
-<td width="55%" valign="top">
 
 | Reason | Complaints | Disputed | Mean delay | > 7 days |
 |:---|---:|---:|---:|---:|
@@ -112,11 +108,10 @@ Categories with ≥ 1,000 payments (smaller books swing too much to rank):
 
 <sub>🔴 fraud-type reason · takeovers are reported fastest, duplicate debits slowest (found on statements).</sub>
 
-</td>
-<td width="45%" valign="top">
+**Resolution status** — 1,492 of 2,800 complaints (53%) are still in progress, pending with the bank, or open:
 
 ```mermaid
-pie showData title Resolution status
+pie showData
     "In progress" : 599
     "Pending bank" : 458
     "Open" : 435
@@ -124,10 +119,6 @@ pie showData title Resolution status
     "Closed" : 442
     "Resolved" : 423
 ```
-
-</td>
-</tr>
-</table>
 
 **Reporting delay** — mean 8.0 days, median 3.2 days, **666 disputes reported after 7 days**:
 
