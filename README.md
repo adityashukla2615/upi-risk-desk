@@ -36,22 +36,16 @@ transaction behaviour.
 
 > One quarter of UPI traffic · **1 Jan – 31 Mar 2026** · 4 source systems cleaned and linked · all figures from [`outputs/metrics.json`](outputs/metrics.json)
 
-### At a glance
-
-<table>
-  <tr>
-    <td align="center" width="25%"><h2>20,000</h2><sub>transactions<br>after removing 400 duplicates</sub></td>
-    <td align="center" width="25%"><h2>₹24.98 Cr</h2><sub>payment value<br>avg ticket ₹12,489</sub></td>
-    <td align="center" width="25%"><h2>12.3%</h2><sub>chargeback-to-txn ratio<br>2,451 disputed payments</sub></td>
-    <td align="center" width="25%"><h2>₹1.01 Cr</h2><sub>in dispute<br>across 2,800 complaints</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><h2>37%</h2><sub>fraud-type disputes<br>takeover · unauthorised · suspected</sub></td>
-    <td align="center"><h2>53%</h2><sub>disputes still open<br>1,492 of 2,800</sub></td>
-    <td align="center"><h2>234 / 100</h2><sub>high-risk merchants / users<br>+385 / 230 medium</sub></td>
-    <td align="center"><h2>121</h2><sub>suspicious dispute rings<br>found in the payment graph</sub></td>
-  </tr>
-</table>
+| Metric | Result |
+|---|---:|
+| 💳 Transactions | 20,000 |
+| 💰 Transaction Value | ₹24.98 Cr |
+| ⚠️ Chargebacks | 2,800 |
+| 🏪 High-Risk Merchants | 234 |
+| 👤 High-Risk Users | 100 |
+| 🕸️ Suspicious Clusters | 121 |
+| 🔗 Graph Nodes | 72K |
+| 🔗 Graph Edges | 106K |
 
 ### 🚨 What the risk team should act on
 
