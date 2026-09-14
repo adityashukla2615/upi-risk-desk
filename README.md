@@ -1,4 +1,27 @@
-# Track 1 — UPI Fraud Ring & Merchant Analytics
+<div align="center">
+
+# 🛡️ UPI Risk Desk
+
+### UPI Fraud Ring Detection & Merchant Risk Analytics
+
+An end-to-end analytics and risk-intelligence platform for detecting
+fraud patterns, merchant risk, dispute clusters, and suspicious UPI
+transaction behaviour.
+
+[🚀 Dashboard](outputs/upi_risk_desk.html) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
+
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![pandas](https://img.shields.io/badge/pandas-3.0-150458?logo=pandas&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-analytics%20model-003B57?logo=sqlite&logoColor=white)
+![NetworkX](https://img.shields.io/badge/NetworkX-graph%20agent-2C7BB6)
+![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?logo=chartdotjs&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+</div>
+
+---
+
+## Track 1 — UPI Fraud Ring & Merchant Analytics
 
 End-to-end solution for the TransOrg AgentIQ Datathon Track 1 bundle: cleaning four messy source systems,
 linking them into an analytics-ready model, computing the fraud / dispute / merchant-risk metrics, a business
