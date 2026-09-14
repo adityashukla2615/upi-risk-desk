@@ -236,7 +236,59 @@ and flagged, and counted in `data_quality_report.csv`.
    `transaction_timestamp` only 149 are, with a sensible distribution (median 3.2 days). The linked timestamp
    is retained as `linked_txn_timestamp`.
 
-## 2. Data model
+## 2. Pipeline & data model
+
+### Pipeline
+
+```
+                    ┌─────────────────────┐
+                    │   Raw UPI Sources   │
+                    │                     │
+                    │ Transactions        │
+                    │ Chargebacks         │
+                    │ KYC                 │
+                    │ Merchants           │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Data Cleaning       │
+                    │ & Standardisation   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Analytics Model     │
+                    │ SQLite + Star       │
+                    │ Schema              │
+                    └──────────┬──────────┘
+                               │
+                 ┌─────────────┴─────────────┐
+                 ▼                           ▼
+        ┌─────────────────┐         ┌─────────────────┐
+        │ Risk Analytics  │         │ Graph Agent     │
+        │                 │         │                 │
+        │ Merchant Risk   │         │ User → Txn      │
+        │ User Risk       │         │ Txn → Merchant  │
+        │ Clusters        │         │ Disputes        │
+        └────────┬────────┘         └────────┬────────┘
+                 │                           │
+                 ▼                           ▼
+        ┌─────────────────┐         ┌─────────────────┐
+        │ Risk Dashboard  │         │ Q&A Answers     │
+        │ Interactive HTML│         │ agent_demo.md   │
+        └─────────────────┘         └─────────────────┘
+```
+
+| Stage | Script | Output |
+|:---|:---|:---|
+| Data cleaning & standardisation | [`src/clean.py`](src/clean.py) | `outputs/clean/*.csv`, `outputs/data_quality_report.csv` |
+| Analytics model | [`src/clean.py`](src/clean.py) | star-schema tables + [`outputs/upi_analytics.db`](outputs/upi_analytics.db) |
+| Risk analytics | [`src/analytics.py`](src/analytics.py) | [`outputs/metrics.json`](outputs/metrics.json), [`outputs/risk/*.csv`](outputs/risk) |
+| Risk dashboard | [`src/build_dashboard.py`](src/build_dashboard.py) | [`outputs/upi_risk_desk.html`](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) |
+| Graph agent | [`src/agent.py`](src/agent.py) | [`outputs/agent_demo.md`](outputs/agent_demo.md) |
+
+### Star schema
 
 ```mermaid
 erDiagram
