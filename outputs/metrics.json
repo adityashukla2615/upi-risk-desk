@@ -4269,6 +4269,22 @@
    "cluster_risk_score": 16.9
   }
  ],
+ "circular_rings": {
+  "stats": {
+   "accounts": 22513,
+   "account_pairs": 16393,
+   "payments_in_graph": 16393,
+   "cyclic_components": 0,
+   "accounts_in_cyclic_components": 0,
+   "structural_cycles": 0,
+   "enumeration_cap_hit": false,
+   "validated_cycles": 0,
+   "rings": 0,
+   "high_confidence": 0,
+   "medium_confidence": 0
+  },
+  "rings": []
+ },
  "backtest": {
   "merchant": {
    "population": 3718,

@@ -506,6 +506,12 @@ footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
         <div id="cl-graph"></div>
         <div class="legend"><span><i class="dot" style="background:var(--muted-mark)"></i>User</span><span><i style="background:var(--muted-mark)"></i>Merchant</span><span><i style="background:var(--s2)"></i>Has chargebacks</span><span><i class="line" style="background:var(--s2)"></i>Disputed payment</span></div>
       </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Circular money loops</h3><div class="tools"><span class="static">Whole quarter</span><span class="note">SCC pruning → bounded cycle enumeration → time &amp; value checks · src/cycles.py</span></div></div>
+        <p class="note" id="cr-lede" style="margin:0 0 8px"></p>
+        <div class="statline" id="cr-stats"></div>
+        <div class="table-wrap"><table id="t-rings"></table></div>
+      </div>
     </div>
   </section>
 
@@ -1117,6 +1123,27 @@ function refreshTableView(id) {
     { h: "Quarter total", r: 1, f: r => int(r.total_txns) }, { h: "Value that day", r: 1, f: r => inrFull(r.day_amount) },
     { h: "Disputes ≤14 d", r: 1, f: r => int(r.disputes_within_14d) },
   ], DATA.spikes);
+
+  const CR = DATA.circular_rings;
+  if (CR) {
+    const st = CR.stats;
+    $("cr-lede").innerHTML = st.rings
+      ? `<b>${int(st.rings)}</b> rings where money left an account and came back through at most a few hops, in time order, with most of its value kept — <b>${int(st.high_confidence)}</b> high and <b>${int(st.medium_confidence)}</b> medium confidence.`
+      : `No circular loops. The engine checked <b>${int(st.payments_in_graph)}</b> successful payments between <b>${int(st.accounts)}</b> accounts and found <b>${int(st.cyclic_components)}</b> strongly connected groups and <b>${int(st.structural_cycles)}</b> candidate cycles.` +
+        (st.cyclic_components ? "" : ` In this dataset money only flows user → merchant and never back, so no loop can form. The check runs on every build and will surface rings once person-to-person or merchant-payout data is added.`);
+    $("cr-stats").innerHTML = statline([
+      ["Accounts", int(st.accounts)], ["Payments checked", int(st.payments_in_graph)], ["Cyclic groups", int(st.cyclic_components)],
+      ["Candidate cycles", int(st.structural_cycles)], ["Validated loops", int(st.validated_cycles)], ["Rings", int(st.rings)]]).replace(/^<div class="statline">|<\/div>$/g, "");
+    $("t-rings").closest(".table-wrap").hidden = !CR.rings.length;
+    const confPill = c => `<span class="pill ${c === "HIGH" ? "crit" : c === "MEDIUM" ? "warn" : "good"}">${esc(title(c))}</span>`;
+    simpleTable("t-rings", [
+      { h: "Ring", f: r => idc(r.ring_id) }, { h: "Loop", f: r => `<span class="mono">${esc(r.top_cycle)}</span>` },
+      { h: "Accounts", r: 1, f: r => int(r.n_accounts) }, { h: "Cycles", r: 1, f: r => int(r.n_cycles) },
+      { h: "Repeats", r: 1, f: r => int(r.instances) }, { h: "Value sent", r: 1, f: r => inrFull(r.value_sent) },
+      { h: "Kept", r: 1, f: r => pct(r.retention, 0) }, { h: "Span", r: 1, f: r => `${r.span_hours.toFixed(1)} h` },
+      { h: "Score", r: 1, f: r => r.ring_score.toFixed(1) }, { h: "Confidence", f: r => confPill(r.confidence) },
+    ], CR.rings);
+  }
 
   const BT = DATA.backtest;
   if (BT) {

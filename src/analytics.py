@@ -9,6 +9,8 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
+from cycles import detect_rings
+
 ROOT = Path(__file__).resolve().parents[1]
 CLEAN = ROOT / "outputs" / "clean"
 RISK = ROOT / "outputs" / "risk"
@@ -390,6 +392,14 @@ def main():
         clusters["cluster_id"] = [f"CL{i+1:03d}" for i in range(len(clusters))]
     clusters.to_csv(RISK / "suspicious_clusters.csv", index=False)
 
+    # ------------------------------------------------------------------ circular laundering loops (src/cycles.py)
+    # Track 1 payments only flow user -> merchant, so this account graph is one-way and holds no loop; the
+    # engine still runs every time so rings surface once person-to-person or merchant-payout data is added.
+    ok = t[t.status == "SUCCESS"]
+    rings, ring_stats = detect_rings(pd.DataFrame({"src": ok.user_id, "dst": ok.merchant_id, "amount": ok.amount,
+                                                   "timestamp": ok.timestamp, "txn_id": ok.txn_id}))
+    rings.to_csv(RISK / "circular_rings.csv", index=False)
+
     # duplicate-debit pattern: same user + merchant + amount within 24h (post-dedup)
     dd = t.sort_values("timestamp").copy()
     dd["prev_gap_h"] = dd.groupby(["user_id", "merchant_id", "amount"]).timestamp.diff().dt.total_seconds() / 3600
@@ -440,6 +450,7 @@ def main():
         "high_value_customers": records(hv_customers[ucols], 15), "high_value_threshold": float(hv_threshold),
         "spikes": records(spikes[["merchant_id", "merchant_name", "merchant_status", "txn_date", "day_txns", "day_amount", "total_txns", "disputes_within_14d", "disputed_amount_14d"]], 15),
         "clusters": records(clusters.drop(columns=["member_users", "member_merchants"]) if len(clusters) else clusters, 12),
+        "circular_rings": {"stats": ring_stats, "rings": records(rings, 25)},
         "backtest": {**bt, "tiers": records(bt_tiers), "signals": records(bt_signals)},
         "history": records(history.tail(30)),
         "counts": {

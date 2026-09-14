@@ -251,6 +251,7 @@ py src/agent.py --ask "Which merchant has the highest chargeback-to-transaction 
 | `outputs/data_quality_report.csv` | 70 checks: what was wrong, how many rows, what was done |
 | `src/analytics.py` → `outputs/metrics.json` | All business metrics (task 12 feed) |
 | `outputs/risk/*.csv` | Analyst worklists: merchant & user risk scores, suspicious clusters, spikes, >7-day disputes, missing-UTR transactions |
+| `src/cycles.py`, `src/config.py`, `tests/test_cycles.py` → `outputs/risk/circular_rings.csv` | Circular-laundering engine (SCC pruning → bounded cycle enumeration → time/value validation → scoring & merge), its thresholds and 15 unit tests — see [§8](#8-circular-laundering-engine) |
 | `outputs/risk/backtest_*.csv`, `outputs/metrics_history.csv` | Time-split detection check (does the scoring predict next-month fraud?) and a per-run history for drift — see [§7](#7-tracking-detection-quality) |
 | `outputs/upi_risk_desk.html` | Task 12 dashboard (self-contained, open in a browser): global filters, cross-filtering charts, drag-to-zoom, period stepper with prior-period KPI deltas, "filter page to this merchant/customer", browser-saved watchlist, shareable view links, keyboard shortcuts (`?`) |
 | `src/agent.py`, `outputs/agent_demo.md` | Task 13 graph-first agent + answers to all example queries |
@@ -495,6 +496,33 @@ A few user signals show lift — unverified KYC (4.0×, n=6), high-value chargeb
 no KYC record (2.0×, n=49) — but samples are too small to reweight on. The scores remain useful as
 **explainable worklists of what has already happened**; they should not be sold as a predictive model until
 this check shows AUC well above 0.5 on fresh data.
+
+## 8. Circular-laundering engine
+
+[`src/cycles.py`](src/cycles.py) looks for money that leaves an account and comes back to it — the classic
+layering loop — in four stages:
+
+| Stage | How | Why |
+|:---|:---|:---|
+| 1. SCC pruning | Tarjan strongly connected components on the directed payer → payee graph | An account can only sit on a loop inside a component of ≥2 mutually reachable accounts; everything else is dropped before the expensive step |
+| 2. Cycle enumeration | Johnson's algorithm, length-bounded (`networkx.simple_cycles`, ≤ `CYCLE_MAX_LEN` = 6 accounts) | Lists every elementary loop once without blowing up on long paths |
+| 3. Validation | Real payments must walk the loop **in time order**, close within **72 h**, and each hop must forward **80–105%** of what it received | A structural loop is not laundering unless the money actually went round |
+| 4. Scoring & merge | 0–100 score: tight loop (25) + fast (25) + value kept (25) + repeated (15) + large (10). **HIGH ≥ 70, MEDIUM ≥ 40.** Loops sharing ≥ 50% of accounts merge into one ring | Ranks rings for review and avoids listing the same ring many times |
+
+All thresholds live in [`src/config.py`](src/config.py). Output: [`outputs/risk/circular_rings.csv`](outputs/risk/circular_rings.csv),
+`metrics.json` → `circular_rings`, and the **Circular money loops** panel in the dashboard's Clusters section.
+
+**Result on Track 1: 0 rings — by construction.** Every payment in this dataset goes user → merchant; no
+merchant pays a user, no user pays a user, no user and merchant share an ID, and no user pays the same
+merchant twice. A one-way graph has no strongly connected component, so no loop can exist. The engine still
+runs on every build and is proven by 15 unit tests on hand-built graphs (loops found from any entry point,
+out-of-order / leaking / slow / tiny loops rejected, length bound, SCC pruning, merge, repeats, cut-offs):
+
+```
+py -m unittest discover -s tests -v
+```
+
+It will surface rings as soon as person-to-person transfers or merchant payouts are added to the feed.
 
 ## Assumptions & limitations
 
