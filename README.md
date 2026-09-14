@@ -32,6 +32,36 @@ transaction behaviour.
 
 ---
 
+## 💡 Why This Project?
+
+This project goes beyond simple fraud classification.
+
+Instead of asking only:
+
+> *"Is this transaction fraudulent?"*
+
+the system asks:
+
+> *"Why is this merchant risky?"*
+
+> *"Which users and merchants form suspicious networks?"*
+
+> *"Which disputes indicate systemic problems?"*
+
+> *"Where are the biggest data-quality issues?"*
+
+This combines:
+
+| Discipline | Where it shows up |
+|:---|:---|
+| 🛠️ **Data engineering** | Four messy source systems repaired, de-duplicated and linked into a star schema + SQLite model |
+| 📊 **Risk analytics** | Chargeback ratios, reporting delays, KYC and category risk across a full quarter |
+| 🕸️ **Graph analysis** | 72K-node / 106K-edge property graph that surfaces connected dispute rings |
+| 📈 **Business intelligence** | Interactive dashboard with cross-filtering, period comparison and drill-downs |
+| 🔎 **Explainable risk scoring** | Additive scores where every flag lists the exact signals that fired |
+
+---
+
 ## 📈 Key Results
 
 > One quarter of UPI traffic · **1 Jan – 31 Mar 2026** · 4 source systems cleaned and linked · all figures from [`outputs/metrics.json`](outputs/metrics.json)
@@ -165,6 +195,28 @@ pie showData
 | Failures cluster at peak hours / batch windows | 8–11% every hour of the day | ❌ systemic, not load |
 | Merchant volume spikes precede disputes | 2 spike days, 0 follow-on disputes | ❌ not present |
 | "Duplicate debit" complaints match duplicate ledger rows | 0 repeats within 24 h after de-dup | ❌ duplication was in the raw feed |
+
+---
+
+## 🔍 Key Insights
+
+### 1. Identity is a major control gap
+**67.9% of payment value** (₹16.95 Cr, 67.6% of payments) came from users without
+a corresponding KYC record.
+
+### 2. Risk is concentrated
+**234 merchants** (2.9% of 8,051 scored) and **100 users** (0.6% of 17,878 scored) were classified
+as high risk — yet those 234 merchants account for **20%** of all linked chargebacks.
+
+### 3. Fraud rings are networked
+Graph analysis identified **121 suspicious connected components** — groups of disputing users
+and merchants joined by shared payments.
+
+### 4. Data quality matters
+**400 duplicate transactions** would have inflated
+reported transaction volume by **₹51.9 L**.
+
+<sub>More findings — rejected-KYC dispute rates, late-reported fraud, ruled-out signals — in [Insights for the business](#4-insights-for-the-business).</sub>
 
 ---
 
