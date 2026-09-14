@@ -1,0 +1,2 @@
+run_at,data_start,data_end,txn_count,chargeback_to_txn_ratio,fraud_reason_share,open_dispute_share,high_risk_merchants,high_risk_users,suspicious_clusters,bt_cutoff,bt_merchant_base_rate,bt_merchant_auc,bt_merchant_high_hit_rate,bt_merchant_high_lift,bt_merchant_high_recall,bt_user_base_rate,bt_user_auc,bt_user_high_hit_rate,bt_user_high_lift,bt_user_high_recall
+2026-09-14 14:16 UTC,2026-01-01,2026-03-31,20000,0.1226,0.3721,0.5329,234,100,121,2026-03-01,0.0662,0.4705,0.0,0.0,0.0,0.0418,0.5307,0.0,0.0,0.0

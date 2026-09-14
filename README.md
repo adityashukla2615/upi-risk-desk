@@ -216,6 +216,11 @@ and merchants joined by shared payments.
 **400 duplicate transactions** would have inflated
 reported transaction volume by **₹51.9 L**.
 
+### 5. Flags explain the past, not yet the future
+A time-split backtest (score on Jan–Feb, check March) gives an AUC of **0.47 for merchants and 0.53 for
+users** — no better than chance. The scores are sound worklists, but detection quality is now tracked on
+every run ([§7](#7-tracking-detection-quality)) before anyone relies on them as a predictor.
+
 <sub>More findings — rejected-KYC dispute rates, late-reported fraud, ruled-out signals — in [Insights for the business](#4-insights-for-the-business).</sub>
 
 ---
@@ -246,6 +251,7 @@ py src/agent.py --ask "Which merchant has the highest chargeback-to-transaction 
 | `outputs/data_quality_report.csv` | 70 checks: what was wrong, how many rows, what was done |
 | `src/analytics.py` → `outputs/metrics.json` | All business metrics (task 12 feed) |
 | `outputs/risk/*.csv` | Analyst worklists: merchant & user risk scores, suspicious clusters, spikes, >7-day disputes, missing-UTR transactions |
+| `outputs/risk/backtest_*.csv`, `outputs/metrics_history.csv` | Time-split detection check (does the scoring predict next-month fraud?) and a per-run history for drift — see [§7](#7-tracking-detection-quality) |
 | `outputs/upi_risk_desk.html` | Task 12 dashboard (self-contained, open in a browser): global filters, cross-filtering charts, drag-to-zoom, period stepper with prior-period KPI deltas, "filter page to this merchant/customer", browser-saved watchlist, shareable view links, keyboard shortcuts (`?`) |
 | `src/agent.py`, `outputs/agent_demo.md` | Task 13 graph-first agent + answers to all example queries |
 
@@ -456,6 +462,39 @@ Transparent additive scores (≥50 high, 30–49 medium) so an analyst can see *
 Every answer is a traversal of that graph. A deterministic intent router maps questions to graph queries (all
 12 example queries plus ring detection and `MCH####` / `USR#####` lookups); an LLM router can replace it
 without touching the query layer. Output for every example question is in `outputs/agent_demo.md`.
+
+## 7. Tracking detection quality
+
+The risk scores use fraud-type disputes as an input, so checking them against the same quarter would be
+circular. `src/analytics.py` therefore runs a **time-split backtest** on every pipeline run:
+
+1. Re-score every merchant and user using only payments **before 1 Mar 2026**, and only chargebacks already
+   *reported* by then (759 later-reported chargebacks on earlier payments stay hidden).
+2. Label an entity positive if it draws a **fraud-type chargeback** (takeover, unauthorised, suspected fraud)
+   on a payment **in March**.
+3. Evaluate only entities active in both windows: hit rate, lift over the base rate, recall and AUC — per
+   tier and per signal.
+
+| Output | What it holds |
+|:---|:---|
+| [`outputs/risk/backtest_tiers.csv`](outputs/risk/backtest_tiers.csv) | Hit rate, lift, recall per tier (HIGH / MEDIUM / LOW) for merchants and users |
+| [`outputs/risk/backtest_signals.csv`](outputs/risk/backtest_signals.csv) | Same, per individual scoring signal |
+| [`outputs/metrics_history.csv`](outputs/metrics_history.csv) | One row per run whose results changed: headline KPIs + backtest AUC / lift, to spot drift |
+| `metrics.json` → `backtest`, `history` | Feed for the dashboard's **Detection check** section |
+
+**Current result — the scores do not yet predict next-month fraud:**
+
+| Entity | Scored in both windows | Fraud next month | Base rate | AUC | HIGH tier hits |
+|:---|---:|---:|---:|---:|:---|
+| Merchants | 3,718 | 246 | 6.6% | **0.47** | 0 of 21 |
+| Users | 932 | 39 | 4.2% | **0.53** | 0 of 3 |
+
+An AUC of 0.5 is a coin flip. Merchant traffic is thin (≤10 payments a quarter), so two months of history
+rarely separates future fraud, and in this synthetic data past disputes do not repeat on the same entity.
+A few user signals show lift — unverified KYC (4.0×, n=6), high-value chargeback (2.7×, n=9),
+no KYC record (2.0×, n=49) — but samples are too small to reweight on. The scores remain useful as
+**explainable worklists of what has already happened**; they should not be sold as a predictive model until
+this check shows AUC well above 0.5 on fresh data.
 
 ## Assumptions & limitations
 

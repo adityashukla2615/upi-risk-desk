@@ -4269,6 +4269,324 @@
    "cluster_risk_score": 16.9
   }
  ],
+ "backtest": {
+  "merchant": {
+   "population": 3718,
+   "fraud_entities": 246,
+   "base_rate": 0.0662,
+   "auc": 0.4705,
+   "high_entities": 21,
+   "high_fraud_hits": 0,
+   "high_hit_rate": 0.0,
+   "high_lift": 0.0,
+   "high_recall": 0.0
+  },
+  "user": {
+   "population": 932,
+   "fraud_entities": 39,
+   "base_rate": 0.0418,
+   "auc": 0.5307,
+   "high_entities": 3,
+   "high_fraud_hits": 0,
+   "high_hit_rate": 0.0,
+   "high_lift": 0.0,
+   "high_recall": 0.0
+  },
+  "cutoff": "2026-03-01",
+  "train_window": [
+   "2026-01-01",
+   "2026-02-28"
+  ],
+  "test_window": [
+   "2026-03-01",
+   "2026-03-31"
+  ],
+  "train_txns": 13094,
+  "test_txns": 6906,
+  "train_chargebacks_visible": 919,
+  "train_chargebacks_reported_later": 759,
+  "test_chargebacks": 929,
+  "test_fraud_chargebacks": 350,
+  "tiers": [
+   {
+    "entity": "merchant",
+    "group": "HIGH",
+    "entities": 21,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.0476
+   },
+   {
+    "entity": "merchant",
+    "group": "MEDIUM",
+    "entities": 62,
+    "fraud_hits": 2,
+    "hit_rate": 0.0323,
+    "lift": 0.4875,
+    "recall": 0.0081,
+    "any_dispute_rate": 0.1129
+   },
+   {
+    "entity": "merchant",
+    "group": "LOW",
+    "entities": 3635,
+    "fraud_hits": 244,
+    "hit_rate": 0.0671,
+    "lift": 1.0145,
+    "recall": 0.9919,
+    "any_dispute_rate": 0.1706
+   },
+   {
+    "entity": "merchant",
+    "group": "HIGH+MEDIUM",
+    "entities": 83,
+    "fraud_hits": 2,
+    "hit_rate": 0.0241,
+    "lift": 0.3642,
+    "recall": 0.0081,
+    "any_dispute_rate": 0.0964
+   },
+   {
+    "entity": "merchant",
+    "group": "ALL",
+    "entities": 3718,
+    "fraud_hits": 246,
+    "hit_rate": 0.0662,
+    "lift": 1.0,
+    "recall": 1.0,
+    "any_dispute_rate": 0.1689
+   },
+   {
+    "entity": "user",
+    "group": "HIGH",
+    "entities": 3,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.0
+   },
+   {
+    "entity": "user",
+    "group": "MEDIUM",
+    "entities": 6,
+    "fraud_hits": 1,
+    "hit_rate": 0.1667,
+    "lift": 3.9829,
+    "recall": 0.0256,
+    "any_dispute_rate": 0.1667
+   },
+   {
+    "entity": "user",
+    "group": "LOW",
+    "entities": 923,
+    "fraud_hits": 38,
+    "hit_rate": 0.0412,
+    "lift": 0.9839,
+    "recall": 0.9744,
+    "any_dispute_rate": 0.1073
+   },
+   {
+    "entity": "user",
+    "group": "HIGH+MEDIUM",
+    "entities": 9,
+    "fraud_hits": 1,
+    "hit_rate": 0.1111,
+    "lift": 2.6553,
+    "recall": 0.0256,
+    "any_dispute_rate": 0.1111
+   },
+   {
+    "entity": "user",
+    "group": "ALL",
+    "entities": 932,
+    "fraud_hits": 39,
+    "hit_rate": 0.0418,
+    "lift": 1.0,
+    "recall": 1.0,
+    "any_dispute_rate": 0.1073
+   }
+  ],
+  "signals": [
+   {
+    "entity": "merchant",
+    "signal": "top10%_disputed_amount",
+    "entities": 50,
+    "fraud_hits": 4,
+    "hit_rate": 0.08,
+    "lift": 1.2091,
+    "recall": 0.0163,
+    "any_dispute_rate": 0.08
+   },
+   {
+    "entity": "merchant",
+    "signal": "not_in_merchant_master",
+    "entities": 1951,
+    "fraud_hits": 133,
+    "hit_rate": 0.0682,
+    "lift": 1.0303,
+    "recall": 0.5407,
+    "any_dispute_rate": 0.1635
+   },
+   {
+    "entity": "merchant",
+    "signal": "high_cb_ratio(≥30%,≥3 txns)",
+    "entities": 108,
+    "fraud_hits": 6,
+    "hit_rate": 0.0556,
+    "lift": 0.8397,
+    "recall": 0.0244,
+    "any_dispute_rate": 0.1481
+   },
+   {
+    "entity": "merchant",
+    "signal": "missing_settlement_account",
+    "entities": 680,
+    "fraud_hits": 37,
+    "hit_rate": 0.0544,
+    "lift": 0.8224,
+    "recall": 0.1504,
+    "any_dispute_rate": 0.1794
+   },
+   {
+    "entity": "merchant",
+    "signal": "transacting_while_not_active",
+    "entities": 306,
+    "fraud_hits": 14,
+    "hit_rate": 0.0458,
+    "lift": 0.6915,
+    "recall": 0.0569,
+    "any_dispute_rate": 0.1601
+   },
+   {
+    "entity": "merchant",
+    "signal": "fraud_type_dispute",
+    "entities": 158,
+    "fraud_hits": 6,
+    "hit_rate": 0.038,
+    "lift": 0.5739,
+    "recall": 0.0244,
+    "any_dispute_rate": 0.1203
+   },
+   {
+    "entity": "merchant",
+    "signal": "3+_disputes",
+    "entities": 5,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.2
+   },
+   {
+    "entity": "merchant",
+    "signal": "repeated_disputes(≥2)",
+    "entities": 36,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.0833
+   },
+   {
+    "entity": "user",
+    "signal": "kyc_not_verified",
+    "entities": 6,
+    "fraud_hits": 1,
+    "hit_rate": 0.1667,
+    "lift": 3.9829,
+    "recall": 0.0256,
+    "any_dispute_rate": 0.1667
+   },
+   {
+    "entity": "user",
+    "signal": "high_value_chargeback(≥₹9,736)",
+    "entities": 9,
+    "fraud_hits": 1,
+    "hit_rate": 0.1111,
+    "lift": 2.6553,
+    "recall": 0.0256,
+    "any_dispute_rate": 0.2222
+   },
+   {
+    "entity": "user",
+    "signal": "no_kyc_record",
+    "entities": 49,
+    "fraud_hits": 4,
+    "hit_rate": 0.0816,
+    "lift": 1.9508,
+    "recall": 0.1026,
+    "any_dispute_rate": 0.1633
+   },
+   {
+    "entity": "user",
+    "signal": "fraud_type_dispute",
+    "entities": 25,
+    "fraud_hits": 2,
+    "hit_rate": 0.08,
+    "lift": 1.9118,
+    "recall": 0.0513,
+    "any_dispute_rate": 0.12
+   },
+   {
+    "entity": "user",
+    "signal": "high_risk_segment",
+    "entities": 30,
+    "fraud_hits": 2,
+    "hit_rate": 0.0667,
+    "lift": 1.5932,
+    "recall": 0.0513,
+    "any_dispute_rate": 0.0667
+   },
+   {
+    "entity": "user",
+    "signal": "multiple_failed_txns",
+    "entities": 3,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.0
+   },
+   {
+    "entity": "user",
+    "signal": "repeated_disputes(≥2)",
+    "entities": 3,
+    "fraud_hits": 0,
+    "hit_rate": 0.0,
+    "lift": 0.0,
+    "recall": 0.0,
+    "any_dispute_rate": 0.0
+   }
+  ]
+ },
+ "history": [
+  {
+   "run_at": "2026-09-14 14:16 UTC",
+   "data_start": "2026-01-01",
+   "data_end": "2026-03-31",
+   "txn_count": 20000,
+   "chargeback_to_txn_ratio": 0.1226,
+   "fraud_reason_share": 0.3721,
+   "open_dispute_share": 0.5329,
+   "high_risk_merchants": 234,
+   "high_risk_users": 100,
+   "suspicious_clusters": 121,
+   "bt_cutoff": "2026-03-01",
+   "bt_merchant_base_rate": 0.0662,
+   "bt_merchant_auc": 0.4705,
+   "bt_merchant_high_hit_rate": 0.0,
+   "bt_merchant_high_lift": 0.0,
+   "bt_merchant_high_recall": 0.0,
+   "bt_user_base_rate": 0.0418,
+   "bt_user_auc": 0.5307,
+   "bt_user_high_hit_rate": 0.0,
+   "bt_user_high_lift": 0.0,
+   "bt_user_high_recall": 0.0
+  }
+ ],
  "counts": {
   "high_risk_merchants": 234,
   "medium_risk_merchants": 385,

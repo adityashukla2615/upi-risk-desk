@@ -326,7 +326,7 @@ footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
     <nav class="jump" aria-label="Sections">
       <a href="#findings">Findings</a><a href="#volume">Volume</a><a href="#failures">Failures</a><a href="#categories">Categories</a>
       <a href="#disputes">Disputes</a><a href="#kyc">KYC</a><a href="#merchants">Merchant risk</a><a href="#users">User risk</a><a href="#watch">Watchlist</a>
-      <a href="#clusters">Clusters</a><a href="#quality">Data quality</a>
+      <a href="#clusters">Clusters</a><a href="#detection">Detection check</a><a href="#quality">Data quality</a>
     </nav>
     <div class="slicebar" aria-live="polite"><span class="count" id="slice-count"></span><span id="chips" style="display:contents"></span></div>
   </div>
@@ -505,6 +505,28 @@ footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
         <div class="panel-head"><h3 id="cl-graph-title">Ring graph</h3><div class="tools"><button type="button" class="mini" id="cl-open">Open details</button></div></div>
         <div id="cl-graph"></div>
         <div class="legend"><span><i class="dot" style="background:var(--muted-mark)"></i>User</span><span><i style="background:var(--muted-mark)"></i>Merchant</span><span><i style="background:var(--s2)"></i>Has chargebacks</span><span><i class="line" style="background:var(--s2)"></i>Disputed payment</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="detection" class="block">
+    <div class="block-head"><h2>Detection check</h2><p class="lede" id="bt-lede"></p></div>
+    <div class="grid">
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Do the risk tiers predict future fraud?</h3><div class="tools"><span class="static">Time split</span><span class="note" id="bt-window"></span></div></div>
+        <div class="statline" id="bt-stats"></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Hit rate by tier</h3><div class="tools"><span class="note">share of entities that drew a fraud-type chargeback afterwards</span></div></div>
+        <div class="table-wrap"><table id="t-bt-tiers"></table></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-head"><h3>Which signals carry the weight</h3><div class="tools"><span class="note">lift = hit rate ÷ base rate · above 1 helps</span></div></div>
+        <div class="table-wrap"><table id="t-bt-signals"></table></div>
+      </div>
+      <div class="panel span-12">
+        <div class="panel-head"><h3>Run history</h3><div class="tools"><span class="note">one row per pipeline run whose results changed · outputs/metrics_history.csv</span></div></div>
+        <div class="table-wrap"><table id="t-history"></table></div>
       </div>
     </div>
   </section>
@@ -1095,6 +1117,45 @@ function refreshTableView(id) {
     { h: "Quarter total", r: 1, f: r => int(r.total_txns) }, { h: "Value that day", r: 1, f: r => inrFull(r.day_amount) },
     { h: "Disputes ≤14 d", r: 1, f: r => int(r.disputes_within_14d) },
   ], DATA.spikes);
+
+  const BT = DATA.backtest;
+  if (BT) {
+    const lift = v => v == null ? "—" : v.toFixed(1) + "×";
+    const liftCell = v => v == null ? "—" : `<span class="pill ${v >= 1.5 ? "good" : v >= 1 ? "warn" : "crit"}">${lift(v)}</span>`;
+    const range = w => `${dayFmt(isoDay(w[0]))} – ${dayFmt(isoDay(w[1]))}`;
+    $("bt-window").textContent = `scored on ${range(BT.train_window)} · checked on ${range(BT.test_window)}`;
+    $("bt-lede").textContent = `The live scores use fraud-type disputes as an input, so checking them against the same quarter would be circular. ` +
+      `Here every merchant and user is re-scored using only payments before ${dayFmt(isoDay(BT.cutoff))} and the ${int(BT.train_chargebacks_visible)} chargebacks already reported by then ` +
+      `(${int(BT.train_chargebacks_reported_later)} more were reported later and stay hidden), then checked against the ${int(BT.test_fraud_chargebacks)} fraud-type chargebacks on later payments. ` +
+      `Only entities active in both windows count.`;
+    $("bt-stats").innerHTML = statline([
+      ["Merchant AUC", BT.merchant.auc == null ? "—" : BT.merchant.auc.toFixed(2)], ["Merchant high-tier lift", lift(BT.merchant.high_lift)],
+      ["Merchant high-tier recall", pct(BT.merchant.high_recall, 0)],
+      ["User AUC", BT.user.auc == null ? "—" : BT.user.auc.toFixed(2)], ["User high-tier lift", lift(BT.user.high_lift)],
+      ["User high-tier recall", pct(BT.user.high_recall, 0)]]).replace(/^<div class="statline">|<\/div>$/g, "");
+    const tierPill = g => g === "HIGH" ? `<span class="pill crit">High</span>` : g === "MEDIUM" ? `<span class="pill warn">Medium</span>` : g === "LOW" ? `<span class="pill good">Low</span>` : `<b>${esc(title(g))}</b>`;
+    simpleTable("t-bt-tiers", [
+      { h: "Entity", f: r => esc(title(r.entity)) }, { h: "Tier", f: r => tierPill(r.group) },
+      { h: "Entities", r: 1, f: r => int(r.entities) }, { h: "Fraud hits", r: 1, f: r => int(r.fraud_hits) },
+      { h: "Hit rate", r: 1, f: r => pct(r.hit_rate) }, { h: "Lift", r: 1, f: r => r.group === "ALL" ? `<span class="dim">base</span>` : liftCell(r.lift) },
+      { h: "Recall", r: 1, f: r => pct(r.recall, 0) }, { h: "Any dispute", r: 1, f: r => pct(r.any_dispute_rate) },
+    ], BT.tiers);
+    simpleTable("t-bt-signals", [
+      { h: "Entity", f: r => esc(title(r.entity)) }, { h: "Signal", f: r => `<span class="mono">${esc(r.signal)}</span>` },
+      { h: "Flagged", r: 1, f: r => int(r.entities) }, { h: "Hit rate", r: 1, f: r => pct(r.hit_rate) },
+      { h: "Lift", r: 1, f: r => r.entities < 20 ? `<span class="dim" title="fewer than 20 flagged">${lift(r.lift)}</span>` : liftCell(r.lift) },
+    ], BT.signals);
+    simpleTable("t-history", [
+      { h: "Run", f: r => `<span class="mono">${esc(r.run_at)}</span>` }, { h: "Data", f: r => `${esc(r.data_start)} → ${esc(r.data_end)}` },
+      { h: "Txns", r: 1, f: r => int(r.txn_count) }, { h: "CB / txn", r: 1, f: r => pct(r.chargeback_to_txn_ratio) },
+      { h: "Fraud-type", r: 1, f: r => pct(r.fraud_reason_share, 0) }, { h: "High merch.", r: 1, f: r => int(r.high_risk_merchants) },
+      { h: "High users", r: 1, f: r => int(r.high_risk_users) }, { h: "Clusters", r: 1, f: r => int(r.suspicious_clusters) },
+      { h: "Merch. AUC", r: 1, f: r => r.bt_merchant_auc == null ? "—" : r.bt_merchant_auc.toFixed(2) },
+      { h: "Merch. lift", r: 1, f: r => lift(r.bt_merchant_high_lift) },
+      { h: "User AUC", r: 1, f: r => r.bt_user_auc == null ? "—" : r.bt_user_auc.toFixed(2) },
+      { h: "User lift", r: 1, f: r => lift(r.bt_user_high_lift) },
+    ], [...(DATA.history || [])].reverse());
+  }
 
   const qTable = DataTable("t-quality", {
     pageSize: 12, placeholder: "Search checks", file: "data_quality_report",
