@@ -529,4 +529,4 @@ It will surface rings as soon as person-to-person transfers or merchant payouts 
 - Data is synthetic; ratios such as a 12% chargeback rate are far above real UPI levels and are reported as-is.
 - Negative amounts are treated as sign errors, not refunds, because no refund status or reversal reference exists.
 - Epoch timestamps are read as naive (UTC) seconds; this keeps them inside the same Jan–Mar window as the text dates.
-- Small categories (<200 transactions) and merchants with <3 payments are shown but should not drive decisions alone.
+- Small categories (<200 transactions) and merchants with <3 payments are shown but should not drive decisions alone
