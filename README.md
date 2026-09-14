@@ -8,7 +8,7 @@ An end-to-end analytics and risk-intelligence platform for detecting
 fraud patterns, merchant risk, dispute clusters, and suspicious UPI
 transaction behaviour.
 
-[🚀 Dashboard](outputs/upi_risk_desk.html) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
+[🚀 Dashboard](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-3.0-150458?logo=pandas&logoColor=white)
@@ -18,6 +18,17 @@ transaction behaviour.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
+
+---
+
+## 🚀 Live Demo
+
+> Interactive dashboard for exploring transaction risk,
+> merchant behaviour and dispute patterns.
+
+### 📊 UPI Risk Dashboard
+
+[**Open Interactive Dashboard →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html)
 
 ---
 
