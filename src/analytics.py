@@ -19,6 +19,17 @@ RISK.mkdir(parents=True, exist_ok=True)
 NOT_ACTIVE = {"INACTIVE", "CLOSED", "SUSPENDED", "BLOCKED"}
 UNVERIFIED_KYC = {"PENDING", "IN_REVIEW", "REJECTED"}
 
+# additive risk-score points per signal, keyed by the signal name without its "(threshold)" suffix;
+# the dashboard reads these too, to show how each score was built
+MERCHANT_SIGNAL_POINTS = {
+    "repeated_disputes": 25, "3+_disputes": 10, "high_cb_ratio": 15, "fraud_type_dispute": 15, "top10%_disputed_amount": 10,
+    "spike_then_dispute": 10, "transacting_while_not_active": 10, "not_in_merchant_master": 5, "missing_settlement_account": 5,
+}
+USER_SIGNAL_POINTS = {
+    "repeated_disputes": 30, "high_value_chargeback": 15, "fraud_type_dispute": 15, "kyc_not_verified": 15, "no_kyc_record": 10,
+    "high_risk_segment": 10, "rapid_repeat_payments": 10, "multiple_failed_txns": 5, "disputed_more_than_income": 5,
+}
+
 
 def load():
     t = pd.read_csv(CLEAN / "fact_transactions.csv", parse_dates=["timestamp", "txn_date"])
@@ -92,16 +103,17 @@ def score_merchants(t, linked, m, spikes):
     mr["chargeback_to_txn_ratio"] = mr.disputed_txns / mr.txns
     spike_disp = spikes[spikes.disputes_within_14d > 0].merchant_id.unique()
     p90_amt = mr.loc[mr.chargebacks > 0, "disputed_amount"].quantile(0.9)
+    w = MERCHANT_SIGNAL_POINTS
     signals = {
-        "repeated_disputes(≥2)": (mr.chargebacks >= 2, 25),
-        "3+_disputes": (mr.chargebacks >= 3, 10),
-        "high_cb_ratio(≥30%,≥3 txns)": ((mr.chargeback_to_txn_ratio >= 0.3) & (mr.txns >= 3), 15),
-        "fraud_type_dispute": (mr.fraud_chargebacks >= 1, 15),
-        "top10%_disputed_amount": (mr.disputed_amount >= p90_amt, 10),
-        "spike_then_dispute": (mr.index.isin(spike_disp), 10),
-        "transacting_while_not_active": (mr.merchant_status.isin(NOT_ACTIVE), 10),
-        "not_in_merchant_master": (~mr.in_master.astype(bool), 5),
-        "missing_settlement_account": (mr.settlement_account_type == "MISSING", 5),
+        "repeated_disputes(≥2)": (mr.chargebacks >= 2, w["repeated_disputes"]),
+        "3+_disputes": (mr.chargebacks >= 3, w["3+_disputes"]),
+        "high_cb_ratio(≥30%,≥3 txns)": ((mr.chargeback_to_txn_ratio >= 0.3) & (mr.txns >= 3), w["high_cb_ratio"]),
+        "fraud_type_dispute": (mr.fraud_chargebacks >= 1, w["fraud_type_dispute"]),
+        "top10%_disputed_amount": (mr.disputed_amount >= p90_amt, w["top10%_disputed_amount"]),
+        "spike_then_dispute": (mr.index.isin(spike_disp), w["spike_then_dispute"]),
+        "transacting_while_not_active": (mr.merchant_status.isin(NOT_ACTIVE), w["transacting_while_not_active"]),
+        "not_in_merchant_master": (~mr.in_master.astype(bool), w["not_in_merchant_master"]),
+        "missing_settlement_account": (mr.settlement_account_type == "MISSING", w["missing_settlement_account"]),
     }
     mr["risk_score"] = sum(np.where(mask, w, 0) for mask, w in signals.values())
     mr["risk_signals"] = [", ".join(k for k, (mask, _) in signals.items() if np.asarray(mask)[i]) for i in range(len(mr))]
@@ -123,16 +135,17 @@ def score_users(t, linked, u):
                                   kyc_status=("kyc_status", "first"), risk_segment=("risk_segment", "first")).join(cbu)
     ur = ur.fillna({"chargebacks": 0, "disputed_amount": 0, "max_disputed": 0, "fraud_chargebacks": 0, "distinct_merchants_disputed": 0})
     ur = ur.join(u.set_index("user_id")[["full_name", "city", "monthly_income", "id_record_count"]])
+    w = USER_SIGNAL_POINTS
     usignals = {
-        "repeated_disputes(≥2)": (ur.chargebacks >= 2, 30),
-        f"high_value_chargeback(≥₹{hv_threshold:,.0f})": (ur.max_disputed >= hv_threshold, 15),
-        "fraud_type_dispute": (ur.fraud_chargebacks >= 1, 15),
-        "kyc_not_verified": (ur.kyc_status.isin(UNVERIFIED_KYC) & (ur.chargebacks > 0), 15),
-        "no_kyc_record": ((ur.kyc_status == "NO_KYC_RECORD") & (ur.chargebacks > 0), 10),
-        "high_risk_segment": (ur.risk_segment == "HIGH", 10),
-        "rapid_repeat_payments(≤30min)": (ur.index.isin(rapid_users), 10),
-        "multiple_failed_txns": (ur.failed_txns >= 2, 5),
-        "disputed_more_than_income": ((ur.disputed_amount > ur.monthly_income) & ur.monthly_income.notna() & (ur.chargebacks > 0), 5),
+        "repeated_disputes(≥2)": (ur.chargebacks >= 2, w["repeated_disputes"]),
+        f"high_value_chargeback(≥₹{hv_threshold:,.0f})": (ur.max_disputed >= hv_threshold, w["high_value_chargeback"]),
+        "fraud_type_dispute": (ur.fraud_chargebacks >= 1, w["fraud_type_dispute"]),
+        "kyc_not_verified": (ur.kyc_status.isin(UNVERIFIED_KYC) & (ur.chargebacks > 0), w["kyc_not_verified"]),
+        "no_kyc_record": ((ur.kyc_status == "NO_KYC_RECORD") & (ur.chargebacks > 0), w["no_kyc_record"]),
+        "high_risk_segment": (ur.risk_segment == "HIGH", w["high_risk_segment"]),
+        "rapid_repeat_payments(≤30min)": (ur.index.isin(rapid_users), w["rapid_repeat_payments"]),
+        "multiple_failed_txns": (ur.failed_txns >= 2, w["multiple_failed_txns"]),
+        "disputed_more_than_income": ((ur.disputed_amount > ur.monthly_income) & ur.monthly_income.notna() & (ur.chargebacks > 0), w["disputed_more_than_income"]),
     }
     ur["risk_score"] = sum(np.where(mask, w, 0) for mask, w in usignals.values())
     ur["risk_signals"] = [", ".join(k for k, (mask, _) in usignals.items() if np.asarray(mask)[i]) for i in range(len(ur))]
