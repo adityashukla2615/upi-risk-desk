@@ -1,0 +1,428 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI Risk Command Center</title>
+<meta name="description" content="Fraud, dispute and merchant-risk command center for one quarter of UPI traffic, with a team of AI risk agents.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c83ff'/%3E%3Cstop offset='1' stop-color='%2336d1dc'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M16 6l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V9z' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M12.5 16l2.5 2.5 4.5-5' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<script>try { const t = localStorage.getItem("upi-cc-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) { /* storage blocked */ }</script>
+<!--__STYLES__-->
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-stream" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-network" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><circle cx="12" cy="10" r="1.8"/><path d="M7.2 7.2l3.3 2M16.8 7.2l-3.3 2M12 12v3.5"/></symbol>
+  <symbol id="i-entities" viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/><path d="M3 21h18"/></symbol>
+  <symbol id="i-disputes" viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-identity" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.5 16c.8-1.6 2-2.3 3.5-2.3s2.7.7 3.5 2.3M15 10h3M15 13h3"/></symbol>
+  <symbol id="i-model" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
+  <symbol id="i-pipeline" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="2.5"/><path d="M4 5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5V5"/><path d="M4 11v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"/></symbol>
+  <symbol id="i-cases" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 12h18"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10h2M14 10h2M8 14h8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 9.3 9.3 0 00-6.4 2.6L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="rail" aria-label="Main navigation">
+    <div class="logo" title="UPI Risk Command Center"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
+    <nav id="nav">
+      <button class="rail-btn" data-view="overview" aria-current="page"><svg><use href="#i-overview"/></svg>Overview</button>
+      <button class="rail-btn" data-view="stream"><svg><use href="#i-stream"/></svg>Live</button>
+      <button class="rail-btn" data-view="network"><svg><use href="#i-network"/></svg>Rings</button>
+      <button class="rail-btn" data-view="entities"><svg><use href="#i-entities"/></svg>Entities</button>
+      <button class="rail-btn" data-view="disputes"><svg><use href="#i-disputes"/></svg>Disputes</button>
+      <button class="rail-btn" data-view="identity"><svg><use href="#i-identity"/></svg>KYC</button>
+      <button class="rail-btn" data-view="model"><svg><use href="#i-model"/></svg>Model</button>
+      <button class="rail-btn" data-view="pipeline"><svg><use href="#i-pipeline"/></svg>Pipeline</button>
+      <button class="rail-btn" data-view="cases"><svg><use href="#i-cases"/></svg>Cases<span class="badge" id="case-badge" hidden>0</span></button>
+    </nav>
+    <div class="rail-foot">
+      <button class="rail-btn" id="theme-btn" title="Toggle theme (T)"><svg><use href="#i-sun"/></svg>Theme</button>
+      <button class="rail-btn" id="keys-btn" title="Keyboard shortcuts (?)"><svg><use href="#i-key"/></svg>Keys</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb">
+        <div class="eyebrow"><span class="live-dot"></span><span id="window-label">Q1 2026 · UPI risk operations</span></div>
+        <h1 id="view-title">Command Center</h1>
+      </div>
+      <div class="filters" id="filters" aria-label="Global filters">
+        <select class="sel" id="f-period" aria-label="Period"></select>
+        <select class="sel" id="f-cat" aria-label="Merchant category"></select>
+        <select class="sel" id="f-kyc" aria-label="KYC status"></select>
+        <select class="sel" id="f-st" aria-label="Payment status"></select>
+        <label class="toggle"><input type="checkbox" id="f-disp"> Disputed only</label>
+        <button class="btn ghost sm" id="f-reset" title="Reset filters (R)"><svg><use href="#i-reset"/></svg>Reset</button>
+      </div>
+      <button class="btn search-btn" id="palette-btn"><svg><use href="#i-search"/></svg><span class="lbl">Search or ask…</span><kbd>Ctrl K</kbd></button>
+      <button class="btn primary" id="copilot-btn"><svg><use href="#i-spark"/></svg>AI Agents<kbd style="background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.3)">Ctrl J</kbd></button>
+    </header>
+    <div class="chipbar" id="chipbar" aria-live="polite"></div>
+
+    <main class="views" id="views">
+      <!-- ================================================================ OVERVIEW -->
+      <section class="view active" data-view="overview" data-title="Command Center">
+        <div class="hero">
+          <div>
+            <div class="eyebrow"><span class="ai-tag">Sentinel briefing</span><span id="hero-window"></span></div>
+            <h2 id="hero-title"></h2>
+            <p id="hero-text"></p>
+            <div class="actions">
+              <button class="btn primary" data-ask="Give me an executive risk brief for this quarter with the top actions."><svg><use href="#i-spark"/></svg>Brief me</button>
+              <button class="btn" data-goto="stream"><svg><use href="#i-play"/></svg>Replay the quarter live</button>
+              <button class="btn" data-goto="network"><svg><use href="#i-network"/></svg>Explore fraud rings</button>
+            </div>
+          </div>
+          <div class="exposure">
+            <div class="lbl">Money in dispute · this slice</div>
+            <div class="big" id="exp-big"></div>
+            <div class="stackbar" id="exp-bar"></div>
+            <div class="legend-row" id="exp-legend"></div>
+            <div class="chart-note" id="exp-note"></div>
+          </div>
+        </div>
+
+        <div class="kpis" id="kpis"></div>
+
+        <div class="grid" style="margin-top:14px">
+          <div class="card c8">
+            <div class="card-head">
+              <div><h3>Payments and disputes over time</h3><div class="sub">Drag across either chart to zoom the whole desk to those dates. Dispute rate uses chargebacks linked by <span class="mono">txn_id</span>.</div></div>
+              <div class="tools"><div class="seg" id="trend-grain"><button aria-pressed="true" data-v="day">Daily</button><button aria-pressed="false" data-v="week">Weekly</button></div></div>
+            </div>
+            <div class="chart fill" id="c-trend"></div>
+          </div>
+          <div class="card c4">
+            <div class="card-head">
+              <div><h3>Sentinel alerts <span class="ai-tag">agent</span></h3><div class="sub">Detectors re-run on every build and on your current slice.</div></div>
+              <span class="pill crit" id="alert-count"></span>
+            </div>
+            <div class="alerts" id="alerts"></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card c7">
+            <div class="card-head">
+              <div><h3>Where disputed money comes from</h3><div class="sub">Disputed rupees flowing from the payer's KYC status → merchant category → what kind of dispute it is and whether it is still open. Click a node to filter.</div></div>
+            </div>
+            <div class="chart h380" id="c-sankey"></div>
+          </div>
+          <div class="card c5">
+            <div class="card-head">
+              <div><h3>Category risk map</h3><div class="sub">Payments vs dispute rate; bubble = disputed ₹. Dashed line = overall rate. Click to filter.</div></div>
+            </div>
+            <div class="chart h380" id="c-bubble"></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card c6">
+            <div class="card-head">
+              <div><h3>When things go wrong</h3><div class="sub">Hour of day × weekday, timed payments only.</div></div>
+              <div class="tools"><div class="seg" id="heat-metric"><button aria-pressed="true" data-v="fail">Failure rate</button><button aria-pressed="false" data-v="disp">Dispute rate</button><button aria-pressed="false" data-v="n">Volume</button></div></div>
+            </div>
+            <div class="chart h300" id="c-heat"></div>
+          </div>
+          <div class="card c6">
+            <div class="card-head">
+              <div><h3>Highest-risk merchants in this slice</h3><div class="sub">Explainable additive score (0–100). Click a row for the full Entity 360.</div></div>
+              <button class="btn sm" data-goto="entities">All entities</button>
+            </div>
+            <div class="table-wrap" style="max-height:300px" id="t-topm"></div>
+          </div>
+        </div>
+
+        <div class="section-title"><div><h2>What the numbers say</h2><p>Findings the risk team should act on — each one is recomputed from the rows embedded in this page.</p></div><span class="static-tag">Whole quarter</span></div>
+        <div class="insights" id="insights"></div>
+      </section>
+
+      <!-- ================================================================ LIVE STREAM -->
+      <section class="view" data-view="stream" data-title="Live Transaction Monitor">
+        <div class="card">
+          <div class="stream-controls">
+            <button class="btn primary" id="s-play"><svg><use href="#i-play"/></svg><span>Start replay</span></button>
+            <div class="seg" id="s-speed"><button data-v="120" aria-pressed="false">2 min/s</button><button data-v="900" aria-pressed="false">15 min/s</button><button data-v="3600" aria-pressed="true">1 h/s</button><button data-v="21600" aria-pressed="false">6 h/s</button></div>
+            <div class="clock"><small>Simulated clock</small><span id="s-clock">—</span></div>
+            <input type="range" class="scrub" id="s-scrub" min="0" max="1000" value="0" aria-label="Replay position">
+            <button class="btn sm" id="s-reset"><svg><use href="#i-reset"/></svg>Restart</button>
+          </div>
+          <div class="chart-note">Replays all 20,000 de-duplicated payments in time order through a <b>leak-free streaming rule engine</b>: every decision only uses what was known at that moment — chargebacks count only after they were <i>reported</i>. As disputes surface later, the engine's precision is scored against them — including when the honest answer is “no lift yet”.</div>
+        </div>
+        <div class="grid">
+          <div class="card c8 flush">
+            <div class="card-head" style="padding:14px 16px 8px"><div><h3>Payment feed</h3><div class="sub">Newest first · click any row to open it</div></div><div class="legend-row"><span><i style="background:var(--crit)"></i>Hold (score ≥ 60)</span><span><i style="background:var(--warn)"></i>Review (30–59)</span><span><i style="background:var(--panel-3)"></i>Allow</span></div></div>
+            <div class="frow" style="animation:none;cursor:default;font:600 9.5px/1 var(--f-mono);letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase"><span>Time</span><span>Merchant</span><span>Why</span><span class="r hide-sm" style="text-align:right">Amount</span><span>Decision</span></div>
+            <div class="feed" id="s-feed"></div>
+          </div>
+          <div class="c4" style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-head"><h3>Engine scoreboard</h3><span class="static-tag">streaming</span></div>
+              <div class="counters" id="s-counters"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Rules that fired</h3></div>
+              <div class="rules" id="s-rules"></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card c12">
+            <div class="card-head"><div><h3>Throughput and holds</h3><div class="sub">Payments per simulated hour, with how many the engine held or sent to review.</div></div></div>
+            <div class="chart h220" id="c-stream"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ NETWORK -->
+      <section class="view" data-view="network" data-title="Fraud Ring Intelligence">
+        <div class="net-wrap">
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Dispute network</h3><div class="sub">Every suspicious cluster: disputing customers (<span style="color:var(--s1)">●</span>) and merchants (<span style="color:var(--s2)">■</span>) joined by payments; red links carry a chargeback. One cell per ring, strongest first. Scroll to zoom, drag to pan, click to inspect, double-click to open.</div></div>
+              <div class="tools">
+                <div class="range-row">Min ring score <input type="range" id="n-min" min="0" max="30" step="1" value="8"><b id="n-min-v" class="mono">8</b></div>
+                <button class="btn sm" id="n-reset">Show all</button>
+              </div>
+            </div>
+            <div class="chart" style="height:600px" id="c-network"></div>
+          </div>
+          <div class="net-side" id="n-side"></div>
+        </div>
+        <div class="grid">
+          <div class="card c8">
+            <div class="card-head"><div><h3>Ring leaderboard</h3><div class="sub">Score = 2×chargebacks + 3×fraud-type + unverified users + disputed ₹/10k.</div></div></div>
+            <div class="table-wrap" style="max-height:360px" id="t-rings"></div>
+          </div>
+          <div class="card c4">
+            <div class="card-head"><div><h3>Circular-laundering engine</h3><div class="sub">SCC pruning → bounded cycle search → time &amp; value validation.</div></div></div>
+            <div id="cycles-card"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ ENTITIES -->
+      <section class="view" data-view="entities" data-title="Merchant &amp; Customer Risk">
+        <div class="card">
+          <div class="card-head">
+            <div><h3 id="ent-title">Risk leaderboard</h3><div class="sub" id="ent-sub"></div></div>
+            <div class="tools">
+              <div class="seg" id="ent-kind"><button data-v="m" aria-pressed="true">Merchants</button><button data-v="u" aria-pressed="false">Customers</button></div>
+              <div class="seg" id="ent-tier"><button data-v="-1" aria-pressed="false">All tiers</button><button data-v="2" aria-pressed="true">High</button><button data-v="1" aria-pressed="false">Medium</button></div>
+            </div>
+          </div>
+          <div class="grid" style="margin:0">
+            <div class="c4"><div class="chart h220" id="c-ent-tiers"></div></div>
+            <div class="c8"><div class="chart h220" id="c-ent-signals"></div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="tbar"><input type="search" id="ent-q" placeholder="Search ID, name, city, signal…" aria-label="Search entities"><span class="dim" id="ent-count"></span><span style="flex:1"></span><button class="btn sm" id="ent-csv"><svg><use href="#i-download"/></svg>Export CSV</button></div>
+          <div class="table-wrap" id="t-ent"></div>
+          <div class="pager" id="ent-pager"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ DISPUTES -->
+      <section class="view" data-view="disputes" data-title="Disputes &amp; Chargebacks">
+        <div class="kpis" id="d-kpis" style="margin-top:0"></div>
+        <div class="grid">
+          <div class="card c7">
+            <div class="card-head"><div><h3>Reason × severity</h3><div class="sub">Complaints in this slice. Click a cell to filter by that reason. ⚑ = fraud-type reason.</div></div></div>
+            <div class="chart h340" id="c-reason-sev"></div>
+          </div>
+          <div class="card c5">
+            <div class="card-head"><div><h3>How late disputes arrive</h3><div class="sub">Days from payment to complaint. Anything past 7 days is hard to recover.</div></div></div>
+            <div class="chart h340" id="c-delay"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card c4">
+            <div class="card-head"><div><h3>Resolution status</h3><div class="sub">Share still unresolved is the backlog.</div></div></div>
+            <div class="chart h260" id="c-resolution" style="height:260px"></div>
+          </div>
+          <div class="card c4">
+            <div class="card-head"><div><h3>Reported late, by reason</h3><div class="sub">Share of each reason reported after 7 days.</div></div></div>
+            <div class="chart" style="height:260px" id="c-late-reason"></div>
+          </div>
+          <div class="card c4">
+            <div class="card-head"><div><h3>Intake channel</h3><div class="sub">Where complaints arrive.</div></div></div>
+            <div class="chart" style="height:260px" id="c-channel"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><div><h3>Longest-delayed disputes</h3><div class="sub">Reported more than 7 days after payment, longest first.</div></div></div>
+          <div class="table-wrap" style="max-height:420px" id="t-late"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ IDENTITY -->
+      <section class="view" data-view="identity" data-title="Identity &amp; KYC Risk">
+        <div class="grid" style="margin-top:0">
+          <div class="card c5">
+            <div class="card-head"><div><h3>Who is paying</h3><div class="sub">Payment value by the payer's KYC status.</div></div></div>
+            <div class="chart h340" id="c-kyc-tree"></div>
+          </div>
+          <div class="card c7">
+            <div class="card-head"><div><h3>Dispute rate by KYC status</h3><div class="sub">Share of payments disputed. Dashed line = this slice overall.</div></div></div>
+            <div class="chart h340" id="c-kyc-rate"></div>
+          </div>
+        </div>
+        <div class="callouts" style="margin-top:14px" id="kyc-callouts"></div>
+        <div class="grid">
+          <div class="card c6">
+            <div class="card-head"><div><h3>Customer base KYC</h3><div class="sub">All 28,920 KYC customers, not just those who paid.</div></div><span class="static-tag">Whole quarter</span></div>
+            <div class="chart h260" id="c-kyc-base" style="height:260px"></div>
+          </div>
+          <div class="card c6">
+            <div class="card-head"><div><h3>Declared risk segment vs behaviour</h3><div class="sub">Does the onboarding risk segment predict disputes?</div></div></div>
+            <div class="chart" style="height:260px" id="c-segment"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ MODEL -->
+      <section class="view" data-view="model" data-title="Detection Model Health">
+        <div class="verdict" id="bt-verdict"></div>
+        <div class="grid">
+          <div class="card c5">
+            <div class="card-head"><div><h3>Out-of-time AUC</h3><div class="sub" id="bt-window"></div></div></div>
+            <div class="gauges"><div class="chart h220" id="c-auc-m"></div><div class="chart h220" id="c-auc-u"></div></div>
+            <div class="chart-note">0.5 = coin flip. Scores are rebuilt using only payments before the cutoff and chargebacks already reported by then, then checked on later fraud-type disputes.</div>
+          </div>
+          <div class="card c7">
+            <div class="card-head"><div><h3>Which signals carry lift</h3><div class="sub">Hit rate of flagged entities ÷ base rate on the test window (≥ 20 flagged shown solid).</div></div></div>
+            <div class="chart h300" id="c-lift"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card c6">
+            <div class="card-head"><h3>Tier performance</h3></div>
+            <div class="table-wrap" id="t-tiers"></div>
+          </div>
+          <div class="card c6">
+            <div class="card-head"><div><h3>Run history</h3><div class="sub">Appended by every pipeline run, for drift tracking.</div></div></div>
+            <div class="table-wrap" id="t-history"></div>
+            <div class="callout" style="margin-top:4px"><h4>What we would do next</h4><p id="bt-next"></p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ PIPELINE -->
+      <section class="view" data-view="pipeline" data-title="Data Pipeline &amp; Quality">
+        <div class="card">
+          <div class="card-head"><div><h3>From four messy systems to one trusted model</h3><div class="sub">Repair and flag, don't delete — rows are removed only when they are duplicates.</div></div><span class="pill good">Best Pipeline award</span></div>
+          <div class="flow" id="flow"></div>
+        </div>
+        <div class="grid">
+          <div class="card c5">
+            <div class="card-head"><div><h3>Rows repaired per source</h3><div class="sub">Sum of rows touched by each check (a row can be fixed more than once).</div></div></div>
+            <div class="chart h300" id="c-dq"></div>
+          </div>
+          <div class="card c7">
+            <div class="card-head"><div><h3>Judgement calls that changed the answer</h3></div></div>
+            <div class="callouts" id="dq-callouts"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="tbar"><h3 style="font-size:14.5px">Quality ledger</h3><input type="search" id="dq-q" placeholder="Search checks…" aria-label="Search quality checks"><select class="sel" id="dq-src" aria-label="Source"></select><span class="dim" id="dq-count"></span></div>
+          <div class="table-wrap" style="max-height:480px" id="t-dq"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ CASES -->
+      <section class="view" data-view="cases" data-title="Case Queue">
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Investigation queue</h3><div class="sub">Entities pinned by you or by the AI agents. Saved in this browser.</div></div>
+            <div class="tools">
+              <button class="btn sm" id="case-report" data-ask="Write an investigation summary of every case in my queue, ordered by priority, with a recommended action for each."><svg><use href="#i-spark"/></svg>AI summary of queue</button>
+              <button class="btn sm" id="case-csv"><svg><use href="#i-download"/></svg>Export CSV</button>
+              <button class="btn sm danger" id="case-clear"><svg><use href="#i-trash"/></svg>Clear</button>
+            </div>
+          </div>
+          <div class="table-wrap" id="t-cases"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================================================================== AI COPILOT -->
+  <aside class="copilot" id="copilot" aria-label="AI agents">
+    <div class="cp-inner">
+      <div class="cp-head">
+        <div class="cp-title">
+          <div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/></svg></div>
+          <div class="grow"><h3>Risk Agents</h3><div class="mode" id="cp-mode"><i></i><span>Local reasoning engine</span></div></div>
+          <button class="icon-btn" id="cp-settings-btn" title="Connect Claude"><svg><use href="#i-gear"/></svg></button>
+          <button class="icon-btn" id="cp-new" title="New conversation"><svg><use href="#i-plus"/></svg></button>
+          <button class="icon-btn" id="cp-close" title="Close (Esc)"><svg><use href="#i-x"/></svg></button>
+        </div>
+        <div class="agents" id="cp-agents"></div>
+        <div class="settings" id="cp-settings" hidden>
+          <b>Connect Claude Opus 5</b>
+          <p>Without a key the agents run on the built-in local reasoning engine (same tools, rule-based planning). With a key, Claude plans, calls the tools and delegates between agents. The key is sent only to api.anthropic.com from this browser.</p>
+          <input type="password" id="cp-key" placeholder="sk-ant-…" autocomplete="off" aria-label="Anthropic API key">
+          <div class="row"><label class="toggle" style="padding:4px 8px"><input type="checkbox" id="cp-remember"> Remember on this device</label><span style="flex:1"></span><button class="btn sm" id="cp-key-clear">Disconnect</button><button class="btn sm primary" id="cp-key-save">Connect</button></div>
+          <p id="cp-key-msg"></p>
+        </div>
+      </div>
+      <div class="cp-body" id="cp-body" aria-live="polite"></div>
+      <div class="cp-foot">
+        <div class="composer">
+          <textarea id="cp-input" rows="1" placeholder="Ask the risk agents anything…" aria-label="Message"></textarea>
+          <button class="icon-btn" id="cp-mic" title="Speak"><svg><use href="#i-mic"/></svg></button>
+          <button class="icon-btn send" id="cp-send" title="Send (Enter)"><svg><use href="#i-send"/></svg></button>
+        </div>
+        <div class="cp-note"><span>Agents can filter the desk, open entities and file cases.</span><span id="cp-status"></span></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="e-title">
+  <div class="drawer-bar">
+    <button class="btn ghost sm" id="dr-back" title="Back"><svg><use href="#i-back"/></svg></button>
+    <span class="crumbs" id="dr-crumbs">Entity 360</span>
+    <button class="btn ghost sm" id="dr-close" title="Close (Esc)"><svg><use href="#i-x"/></svg></button>
+  </div>
+  <div class="drawer-body" id="dr-body"></div>
+</aside>
+
+<div class="palette-wrap" id="palette" hidden>
+  <div class="palette" role="dialog" aria-label="Command palette">
+    <input id="pal-input" placeholder="Jump to a view, look up USR / MCH / TXN / CBK / CL ids, or ask the agents…" autocomplete="off">
+    <ul id="pal-list" role="listbox"></ul>
+    <div class="foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span></div>
+  </div>
+</div>
+
+<div class="palette-wrap" id="keys" hidden>
+  <div class="palette" role="dialog" aria-label="Keyboard shortcuts" style="padding:18px 20px">
+    <h3 style="font-size:16px;margin-bottom:12px">Keyboard shortcuts</h3>
+    <div class="rules" id="keys-list"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.6.0/echarts.min.js"></script>
+<!--__SCRIPTS__-->

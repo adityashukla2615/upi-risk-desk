@@ -1,14 +1,18 @@
-"""Step 3: package metrics + the row-level model into the interactive dashboard -> outputs/upi_risk_desk.html
+"""Step 3: package metrics + the row-level model into the dashboards
+    -> outputs/upi_risk_desk.html          Risk Command Center + AI agents (dashboard/command_center/)
+    -> outputs/upi_risk_desk_classic.html  the original analyst report view (dashboard/template.html)
 
-The page recomputes every KPI, chart and table in the browser from the embedded rows, so the
-global filters, cross-filtering and drill-downs need no server. String columns are dictionary
-encoded to keep the file small.
+Both pages recompute every KPI, chart and table in the browser from the embedded rows, so the
+global filters, cross-filtering, drill-downs and the agents' tools need no server. String columns
+are dictionary encoded to keep the file small.
 """
 import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+from analytics import MERCHANT_SIGNAL_POINTS, USER_SIGNAL_POINTS
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "outputs"
@@ -129,8 +133,17 @@ def rows_payload():
             "hub": str(r["hub_node"]), "hd": int(r["hub_degree"]),
         })
 
+    points = lambda names, table: [table.get(n.split("(")[0], 0) for n in names]
+    raw = {
+        "transactions": len(pd.read_csv(need(ROOT / "track1_upi_transactions.csv"), dtype=str)),
+        "kyc": len(pd.read_csv(need(ROOT / "track1_kyc_records.csv"), dtype=str)),
+        "merchants": len(pd.read_csv(need(ROOT / "track1_merchants_master.csv"), dtype=str)),
+        "chargebacks": len(json.loads(need(ROOT / "track1_chargebacks.json").read_text(encoding="utf-8"))),
+    }
+
     return {
-        "start": str(start.date()), "days": int(day.max()) + 1,
+        "start": str(start.date()), "days": int(day.max()) + 1, "raw": raw,
+        "sigw": {"msig": points(msig.values, MERCHANT_SIGNAL_POINTS), "usig": points(usig.values, USER_SIGNAL_POINTS)},
         "dict": {"cat": cat.values, "kyc": kyc.values, "seg": seg.values, "status": status.values, "reason": reason.values,
                  "sev": sev.values, "res": res.values, "ch": ch.values, "mstatus": mstatus.values, "settle": settle.values,
                  "tier": tier.values, "msig": msig.values, "usig": usig.values, "utr": utr.values},
@@ -144,17 +157,32 @@ def embed(obj):
     return s.replace("<", "\\u003c").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
 
 
+def command_center():
+    """dashboard/command_center/index.html with its stylesheet and scripts inlined, so the output is one portable file."""
+    src = ROOT / "dashboard" / "command_center"
+    html = need(src / "index.html").read_text(encoding="utf-8")
+    styles = need(src / "styles.css").read_text(encoding="utf-8")
+    scripts = "\n".join(f"/* ---- {p.name} ---- */\n" + p.read_text(encoding="utf-8") for p in sorted((src / "js").glob("*.js")))
+    for token, body in (("<!--__STYLES__-->", f"<style>\n{styles}</style>"), ("<!--__SCRIPTS__-->", f"<script>\n{scripts}</script>")):
+        if html.count(token) != 1:
+            raise SystemExit(f"command_center/index.html must contain {token} exactly once")
+        html = html.replace(token, body)
+    return html
+
+
 def main():
     metrics = json.loads(need(OUT / "metrics.json").read_text(encoding="utf-8"))
     quality = json.loads(pd.read_csv(need(OUT / "data_quality_report.csv")).to_json(orient="records", force_ascii=False))
-    html = need(ROOT / "dashboard" / "template.html").read_text(encoding="utf-8")
-    for token, payload in (("/*__DATA__*/null", metrics), ("/*__QUALITY__*/null", quality), ("/*__ROWS__*/null", rows_payload())):
-        if html.count(token) != 1:
-            raise SystemExit(f"template must contain placeholder {token} exactly once")
-        html = html.replace(token, embed(payload))
-    out = OUT / "upi_risk_desk.html"
-    out.write_text(html, encoding="utf-8")
-    print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
+    payloads = (("/*__DATA__*/null", embed(metrics)), ("/*__QUALITY__*/null", embed(quality)), ("/*__ROWS__*/null", embed(rows_payload())))
+    pages = (("upi_risk_desk.html", command_center()), ("upi_risk_desk_classic.html", need(ROOT / "dashboard" / "template.html").read_text(encoding="utf-8")))
+    for name, html in pages:
+        for token, payload in payloads:
+            if html.count(token) != 1:
+                raise SystemExit(f"{name}: template must contain placeholder {token} exactly once")
+            html = html.replace(token, payload)
+        out = OUT / name
+        out.write_text(html, encoding="utf-8")
+        print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
 
 
 if __name__ == "__main__":
