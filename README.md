@@ -8,13 +8,14 @@ An end-to-end analytics and risk-intelligence platform for detecting
 fraud patterns, merchant risk, dispute clusters, and suspicious UPI
 transaction behaviour.
 
-[🚀 Dashboard](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [📈 Results](#-key-results) · [📊 Analytics](src/analytics.py) · [🤖 Graph Agent](outputs/agent_demo.md) · [📁 Dataset](track1_dataset_notes.txt)
+[🚀 Command Center](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [🤖 AI Agents](#-ai-risk-agents) · [📈 Results](#-key-results) · [📊 Analytics](src/analytics.py) · [📁 Dataset](track1_dataset_notes.txt)
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-3.0-150458?logo=pandas&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-analytics%20model-003B57?logo=sqlite&logoColor=white)
 ![NetworkX](https://img.shields.io/badge/NetworkX-graph%20agent-2C7BB6)
-![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?logo=chartdotjs&logoColor=white)
+![Claude](https://img.shields.io/badge/Claude-Opus%205%20agents-D97757?logo=anthropic&logoColor=white)
+![ECharts](https://img.shields.io/badge/ECharts-5.6-AA344D?logo=apacheecharts&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
@@ -23,12 +24,43 @@ transaction behaviour.
 
 ## 🚀 Live Demo
 
-> Interactive dashboard for exploring transaction risk,
-> merchant behaviour and dispute patterns.
+### 🛰️ UPI Risk Command Center
 
-### 📊 UPI Risk Dashboard
+[**Open the Command Center →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [Classic analyst report view](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk_classic.html)
 
-[**Open Interactive Dashboard →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html)
+One self-contained page (no server) that recomputes everything from the 20,000 embedded payments:
+
+| View | What a risk analyst gets |
+|:---|:---|
+| **Overview** | Sentinel briefing, “money in dispute” exposure, KPI tiles with sparklines and prior-period deltas, brush-to-zoom trend, KYC → category → dispute **Sankey**, category risk map, hour × weekday heatmap, live alerts |
+| **Live** | Replays the quarter through a **leak-free streaming rule engine** (hold / review / allow) and scores its own precision as disputes surface |
+| **Rings** | Constellation view of all 121 dispute rings, ring leaderboard, circular-laundering engine result |
+| **Entities** | Merchant & customer leaderboards; **Entity 360** drawer with score waterfall (every point explained), activity timeline and ego network |
+| **Disputes · KYC** | Reason × severity heatmap, reporting-delay curve, backlog, identity-gap treemap, dispute rate by KYC |
+| **Model** | Honest out-of-time backtest (AUC gauges, per-signal lift, run history) |
+| **Pipeline** | The award-winning cleaning pipeline, 70-check quality ledger and the judgement calls that changed the answer |
+| **Cases** | Investigation queue filled by analysts *or agents*, with CSV export |
+
+Global filters, cross-filtering on every chart, shareable URLs, `Ctrl K` command palette, dark/light themes, keyboard shortcuts (`?`).
+
+---
+
+## 🤖 AI Risk Agents
+
+A team of five agents lives in the Command Center (`Ctrl J`) and shares **one tool registry** of 16 tools over the cleaned model:
+
+| Agent | Role | Example |
+|:---|:---|:---|
+| 🧭 **Risk Lead** | Plans, routes and — with Claude — **delegates to specialists in parallel**, then synthesises | “Brief me and file the worst rings as cases” |
+| 📊 **Analyst** | KPIs, breakdowns, trends, rankings, period comparisons | “Which merchant category has the highest disputed amount?” |
+| 🕵️ **Investigator** | Entity & ring deep dives: score explained signal by signal, shared-counterparty network, recommended action | “Investigate MCH9572” |
+| 🛰️ **Sentinel** | Anomaly detectors: identity gap, rejected-KYC activity, fraud backlog, daily spikes, inactive merchants | “What looks unusual in February?” |
+| 📝 **Reporter** | Executive briefs and case-queue summaries | “Summarise my case queue with next actions” |
+
+- **Two brains, same tools.** Paste an Anthropic key (⚙) and the agents run on **Claude Opus 5** with streamed reasoning, tool use and real delegation. Without a key a deterministic **local reasoning engine** plans the same tool calls — so the demo never breaks.
+- **Agents act, not just talk.** Tools like `apply_filters`, `open_entity`, `show_chart` and `add_to_cases` let an agent drive the desk. Every answer shows its full trace of tool calls.
+- **Grounded.** Numbers only come from tools; the system prompt carries the pipeline's rules (txn_id attribution, dispute-rate definition, AUC ≈ 0.5 caveat).
+- **Python too.** [`src/llm_agent.py`](src/llm_agent.py) runs the same team from the terminal over the property graph plus a **read-only SQL tool** whose SQLite authorizer blocks writes and PAN / Aadhaar / UTR columns ([tests](tests/test_llm_tools.py)).
 
 ---
 
@@ -235,9 +267,14 @@ dashboard, and a graph-first query agent.
 py -m pip install --user pandas networkx        # numpy comes with pandas
 py src/clean.py            # 1. clean + standardise + build model  -> outputs/clean/, outputs/upi_analytics.db
 py src/analytics.py        # 2. metrics, risk scores, clusters      -> outputs/metrics.json, outputs/risk/
-py src/build_dashboard.py  # 3. dashboard                          -> outputs/upi_risk_desk.html
+py src/build_dashboard.py  # 3. dashboards                         -> outputs/upi_risk_desk.html (+ _classic.html)
 py src/agent.py --demo     # 4. graph agent on example queries     -> outputs/agent_demo.md
 py src/agent.py --ask "Which merchant has the highest chargeback-to-transaction ratio?"
+
+# optional: Claude-powered agent team in the terminal (needs ANTHROPIC_API_KEY or `ant auth login`)
+py -m pip install --user anthropic
+py src/llm_agent.py --ask "Are any merchants sharing an unusual number of disputing customers?"
+py -m unittest discover -s tests   # 19 tests: laundering engine + agent SQL guard
 ```
 
 ## Deliverables
@@ -253,8 +290,10 @@ py src/agent.py --ask "Which merchant has the highest chargeback-to-transaction 
 | `outputs/risk/*.csv` | Analyst worklists: merchant & user risk scores, suspicious clusters, spikes, >7-day disputes, missing-UTR transactions |
 | `src/cycles.py`, `src/config.py`, `tests/test_cycles.py` → `outputs/risk/circular_rings.csv` | Circular-laundering engine (SCC pruning → bounded cycle enumeration → time/value validation → scoring & merge), its thresholds and 15 unit tests — see [§8](#8-circular-laundering-engine) |
 | `outputs/risk/backtest_*.csv`, `outputs/metrics_history.csv` | Time-split detection check (does the scoring predict next-month fraud?) and a per-run history for drift — see [§7](#7-tracking-detection-quality) |
-| `outputs/upi_risk_desk.html` | Task 12 dashboard (self-contained, open in a browser): global filters, cross-filtering charts, drag-to-zoom, period stepper with prior-period KPI deltas, "filter page to this merchant/customer", browser-saved watchlist, shareable view links, keyboard shortcuts (`?`) |
+| `dashboard/command_center/` → `outputs/upi_risk_desk.html` | Task 12 **Risk Command Center** (self-contained): 9 views, live replay engine, ring constellation, Entity 360, case queue, and the in-browser AI agent team (`js/08_tools.js` tool registry, `js/09_agents.js` Claude runtime, `js/10_local.js` local reasoning engine) |
+| `dashboard/template.html` → `outputs/upi_risk_desk_classic.html` | The original analyst report view (period stepper, watchlist, drill-downs) |
 | `src/agent.py`, `outputs/agent_demo.md` | Task 13 graph-first agent + answers to all example queries |
+| `src/llm_agent.py`, `tests/test_llm_tools.py` | Claude Opus 5 agent team over the graph + guarded read-only SQL |
 
 ## 1. Cleaning strategy
 
@@ -461,8 +500,12 @@ Transparent additive scores (≥50 high, 30–49 medium) so an analyst can see *
 `(User)-[:PAID]->(Transaction)-[:TO]->(Merchant)`, `(Transaction)-[:IN_CATEGORY]->(Category)`,
 `(Transaction)-[:DISPUTED_BY]->(Chargeback)-[:HAS_REASON]->(Reason)`, `(User)-[:HAS_KYC]->(KycStatus)`.
 Every answer is a traversal of that graph. A deterministic intent router maps questions to graph queries (all
-12 example queries plus ring detection and `MCH####` / `USR#####` lookups); an LLM router can replace it
-without touching the query layer. Output for every example question is in `outputs/agent_demo.md`.
+12 example queries plus ring detection and `MCH####` / `USR#####` lookups). Output for every example question is in `outputs/agent_demo.md`.
+
+`src/llm_agent.py` swaps the router for **Claude Opus 5** without touching the query layer: the graph traversals
+become tools, alongside a read-only SQL tool and a `delegate` tool so the Risk Lead can hand work to analyst,
+investigator and reporter agents in parallel. The same agent team runs inside the Command Center — see
+[🤖 AI Risk Agents](#-ai-risk-agents).
 
 ## 7. Tracking detection quality
 
