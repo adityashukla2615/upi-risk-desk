@@ -8,7 +8,7 @@ An end-to-end analytics and risk-intelligence platform for detecting
 fraud patterns, merchant risk, dispute clusters, and suspicious UPI
 transaction behaviour.
 
-[🚀 Command Center](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [🤖 AI Agents](#-ai-risk-agents) · [📈 Results](#-key-results) · [📊 Analytics](src/analytics.py) · [📁 Dataset](track1_dataset_notes.txt)
+[🚀 Command Center](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html?v=2) · [🤖 AI Agents](#-ai-risk-agents) · [📈 Results](#-key-results) · [📊 Analytics](src/analytics.py) · [📁 Dataset](track1_dataset_notes.txt)
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-3.0-150458?logo=pandas&logoColor=white)
@@ -26,7 +26,7 @@ transaction behaviour.
 
 ### 🛰️ UPI Risk Command Center
 
-[**Open the Command Center →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) · [Classic analyst report view](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk_classic.html)
+[**Open the Command Center →**](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html?v=2) · [Classic analyst report view](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk_classic.html?v=2)
 
 One self-contained page (no server) that recomputes everything from the 20,000 embedded payments:
 
@@ -383,7 +383,7 @@ and flagged, and counted in `data_quality_report.csv`.
 | Data cleaning & standardisation | [`src/clean.py`](src/clean.py) | `outputs/clean/*.csv`, `outputs/data_quality_report.csv` |
 | Analytics model | [`src/clean.py`](src/clean.py) | star-schema tables + [`outputs/upi_analytics.db`](outputs/upi_analytics.db) |
 | Risk analytics | [`src/analytics.py`](src/analytics.py) | [`outputs/metrics.json`](outputs/metrics.json), [`outputs/risk/*.csv`](outputs/risk) |
-| Risk dashboard | [`src/build_dashboard.py`](src/build_dashboard.py) | [`outputs/upi_risk_desk.html`](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html) |
+| Risk dashboard | [`src/build_dashboard.py`](src/build_dashboard.py) | [`outputs/upi_risk_desk.html`](https://adityashukla2615.github.io/upi-risk-desk/outputs/upi_risk_desk.html?v=2) |
 | Graph agent | [`src/agent.py`](src/agent.py) | [`outputs/agent_demo.md`](outputs/agent_demo.md) |
 
 ### Star schema
